@@ -259,6 +259,9 @@
             <el-button size="small" @click="batchSetVolume">
               批量设置体积
             </el-button>
+            <el-button type="danger" size="small" @click="handleClearAllSamples">
+              清空表格
+            </el-button>
           </div>
         </div>
       </template>
@@ -569,7 +572,12 @@
             {{ formatVolume(row, row.v0) }}
           </template>
         </el-table-column>
-        <el-table-column prop="rounded_value" label="浓度(mg/m³)" width="100">
+        <el-table-column prop="concentration" label="浓度(mg/m³)" width="100">
+          <template #default="{ row }">
+            <span>{{ row.concentration?.toFixed(3) || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="rounded_value" label="检测值(修约)" width="100">
           <template #default="{ row }">
             <span class="rounded-value">{{ formatRoundedValue(row) }}</span>
           </template>
@@ -1162,6 +1170,28 @@ const deleteSampleRow = async (row: any, index: number) => {
     }
     samples.value.splice(index, 1)
     ElMessage.success('已删除')
+  } catch (e) {
+    // 用户取消
+  }
+}
+
+// 清空所有样品数据
+const handleClearAllSamples = async () => {
+  try {
+    await ElMessageBox.confirm(
+      '确定清空所有样品数据？此操作不可恢复！',
+      '清空确认',
+      { type: 'warning', confirmButtonText: '确定清空', cancelButtonText: '取消' }
+    )
+    // 删除数据库中的所有样品
+    for (const sample of samples.value) {
+      if (sample.id) {
+        await window.electronAPI.deleteSample(sample.id)
+      }
+    }
+    // 清空本地数据
+    samples.value = []
+    ElMessage.success('已清空所有样品数据')
   } catch (e) {
     // 用户取消
   }
