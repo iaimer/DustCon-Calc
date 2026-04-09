@@ -271,7 +271,7 @@
         <el-alert type="info" :closable="false">
           <template #title>
             最低定量浓度参考：
-            500L → 0.2 mg/m³ | 300L → 0.34 mg/m³ | 420L → 0.24 mg/m³ | 450L → 0.23 mg/m³ | 525L → 0.20 mg/m³
+            500L → 0.2 mg/m³ | 300L → 0.34 mg/m³ | 420L → 0.24 mg/m³ | 450L → 0.23 mg/m³ | 480L → 0.21 mg/m³ | 525L → 0.20 mg/m³
             <span style="margin-left: 20px; color: #909399;">| 支持单列粘贴（Ctrl+V）：点击该列输入框后粘贴数据</span>
           </template>
         </el-alert>
@@ -838,7 +838,7 @@ const handlePaste = (event: ClipboardEvent) => {
     if (field === 'vt') {
       // Vt 需验证有效值
       const vtVal = parseInt(trimmedVal)
-      row.vt = [500, 300, 420, 450, 525].includes(vtVal) ? vtVal : 500
+      row.vt = [500, 300, 420, 450, 480, 525].includes(vtVal) ? vtVal : 500
     } else if (['w1', 'w2_first', 'w2_second'].includes(field)) {
       // 数值字段
       row[field] = parseFloat(trimmedVal) || null
@@ -854,7 +854,7 @@ const handlePaste = (event: ClipboardEvent) => {
 
 // 处理Vt输入变化（验证有效值）
 const handleVtChange = (row: any) => {
-  const validValues = [500, 300, 420, 450, 525]
+  const validValues = [500, 300, 420, 450, 480, 525]
   const vtNum = parseInt(row.vt as string)
 
   if (!validValues.includes(vtNum)) {
@@ -1240,16 +1240,20 @@ const handleCellKeydown = (event: Event, rowIndex: number, field: string) => {
       if (inputEl.selectionStart === 0 || inputEl.selectionStart === null) {
         newCol = Math.max(0, colIndex - 1)
         keyEvent.preventDefault()
+      } else {
+        return
       }
-      return
+      break
     case 'ArrowRight':
       // 只有在输入框光标在最右边时才移动到下一列
       const inputElRight = keyEvent.target as HTMLInputElement
       if (inputElRight.selectionStart === inputElRight.value.length || inputElRight.selectionStart === null) {
         newCol = Math.min(editableColumns.length - 1, colIndex + 1)
         keyEvent.preventDefault()
+      } else {
+        return
       }
-      return
+      break
     case 'Tab':
       if (keyEvent.shiftKey) {
         newCol = Math.max(0, colIndex - 1)

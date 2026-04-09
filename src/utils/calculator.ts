@@ -48,7 +48,7 @@ export function roundBank(num: number, decimals: number): number {
 /**
  * 标准采样体积选项
  */
-export const SAMPLING_VOLUMES = [500, 300, 420, 450, 525] as const
+export const SAMPLING_VOLUMES = [500, 300, 420, 450, 480, 525] as const
 
 /**
  * 根据采样体积获取最低定量浓度
