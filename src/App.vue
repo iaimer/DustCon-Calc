@@ -98,7 +98,7 @@ const createNewProject = async () => {
       analysis_location: '天平室',
       analysis_date: dayjs().format('YYYY.MM.DD'),
       sampling_date: '',
-      test_standard: 'GBZ/T 192.1-2025',
+      test_standard: 'GBZ/T 192.1-2025' as const,
       sampling_temperature: null,
       sampling_air_pressure: null,
       analysis_temperature_min: null,
