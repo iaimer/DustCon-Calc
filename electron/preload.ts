@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   createProject: (data: any) => ipcRenderer.invoke('db:createProject', data),
   updateProject: (id: number, data: any) => ipcRenderer.invoke('db:updateProject', id, data),
   deleteProject: (id: number) => ipcRenderer.invoke('db:deleteProject', id),
+  copyProject: (id: number) => ipcRenderer.invoke('db:copyProject', id),
 
   // Samples
   getSamples: (projectId: number) => ipcRenderer.invoke('db:getSamples', projectId),

@@ -11,6 +11,7 @@ interface ElectronAPI {
   createProject: (data: ProjectFormData) => Promise<Project>
   updateProject: (id: number, data: ProjectFormData) => Promise<Project>
   deleteProject: (id: number) => Promise<boolean>
+  copyProject: (id: number) => Promise<{ id: number }>
 
   // Samples
   getSamples: (projectId: number) => Promise<Sample[]>

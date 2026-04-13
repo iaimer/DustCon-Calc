@@ -264,6 +264,79 @@ ipcMain.handle('db:deleteProject', async (_, id: number) => {
   return true
 })
 
+ipcMain.handle('db:copyProject', async (_, id: number) => {
+  if (!db) return null
+  try {
+    // 获取原项目信息
+    const projectResult = db.exec('SELECT * FROM projects WHERE id = ?', [id])
+    if (projectResult.length === 0 || projectResult[0].values.length === 0) return null
+    const row = projectResult[0].values[0]
+    const project = {
+      employer_name: row[1],
+      test_number: row[2],
+      analysis_location: row[3],
+      analysis_date: row[4],
+      sampling_date: row[5],
+      test_standard: row[6],
+      sampling_temperature: row[7],
+      sampling_air_pressure: row[8],
+      analysis_temperature_min: row[9],
+      analysis_temperature_max: row[10],
+      analysis_humidity_min: row[11],
+      analysis_humidity_max: row[12],
+      instrument_name: row[13],
+      instrument_no: row[14],
+      analyst: row[15],
+      reviewer: row[16]
+    }
+
+    // 创建新项目（不复制样品数据）
+    db.run(`
+      INSERT INTO projects (employer_name, test_number, analysis_location, analysis_date, sampling_date,
+        test_standard, sampling_temperature, sampling_air_pressure,
+        analysis_temperature_min, analysis_temperature_max,
+        analysis_humidity_min, analysis_humidity_max,
+        instrument_name, instrument_no, analyst, reviewer)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      project.employer_name + '（副本）',
+      project.test_number,
+      project.analysis_location,
+      project.analysis_date,
+      project.sampling_date,
+      project.test_standard,
+      project.sampling_temperature,
+      project.sampling_air_pressure,
+      project.analysis_temperature_min,
+      project.analysis_temperature_max,
+      project.analysis_humidity_min,
+      project.analysis_humidity_max,
+      project.instrument_name,
+      project.instrument_no,
+      project.analyst,
+      project.reviewer
+    ])
+    const newProjectResult = db.exec('SELECT last_insert_rowid() as id')
+    const newProjectId = newProjectResult[0].values[0][0]
+
+    // 复制标准砝码检查信息
+    const weightResult = db.exec('SELECT * FROM standard_weights WHERE project_id = ?', [id])
+    if (weightResult.length > 0 && weightResult[0].values.length > 0) {
+      const weightRow = weightResult[0].values[0]
+      db.run(`
+        INSERT INTO standard_weights (project_id, weight_no, original_mass, current_mass, check_result)
+        VALUES (?, ?, ?, ?, ?)
+      `, [newProjectId, weightRow[2], weightRow[3], weightRow[4], weightRow[5]])
+    }
+
+    saveDatabase()
+    return { id: newProjectId }
+  } catch (e) {
+    console.error('复制项目失败:', e)
+    throw e
+  }
+})
+
 // Samples
 ipcMain.handle('db:getSamples', async (_, projectId: number) => {
   if (!db) return []

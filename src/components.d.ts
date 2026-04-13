@@ -29,6 +29,7 @@ declare module 'vue' {
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTag: typeof import('element-plus/es')['ElTag']
+    ElTooltip: typeof import('element-plus/es')['ElTooltip']
     ProjectInfoForm: typeof import('./components/project/ProjectInfoForm.vue')['default']
     SampleTable: typeof import('./components/samples/SampleTable.vue')['default']
     StandardWeightForm: typeof import('./components/project/StandardWeightForm.vue')['default']

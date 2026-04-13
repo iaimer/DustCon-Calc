@@ -28,6 +28,26 @@
               >
                 <div class="project-item-header">
                   <span class="project-name">{{ project.test_number || '未编号' }}</span>
+                  <div class="project-actions">
+                    <el-tooltip content="复制项目" placement="top">
+                      <el-button
+                        type="primary"
+                        size="small"
+                        :icon="DocumentCopy"
+                        circle
+                        @click.stop="copyProject(project.id)"
+                      />
+                    </el-tooltip>
+                    <el-tooltip content="删除项目" placement="top">
+                      <el-button
+                        type="danger"
+                        size="small"
+                        :icon="Delete"
+                        circle
+                        @click.stop="deleteProject(project.id)"
+                      />
+                    </el-tooltip>
+                  </div>
                 </div>
                 <div class="project-item-date">
                   {{ formatDate(project.analysis_date) || '未设置日期' }}
@@ -59,7 +79,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { Plus, Search, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
+import { Plus, Search, ArrowLeft, ArrowRight, Delete, DocumentCopy } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ProjectDetail from './views/ProjectDetail.vue'
 import dayjs from 'dayjs'
@@ -124,7 +144,7 @@ const selectProject = (id: number) => {
   selectedProjectId.value = id
 }
 
-const handleProjectDelete = async (id: number) => {
+const deleteProject = async (id: number) => {
   try {
     await ElMessageBox.confirm('确定删除该项目及其所有样品数据？', '删除确认', {
       type: 'warning'
@@ -138,6 +158,28 @@ const handleProjectDelete = async (id: number) => {
   } catch (e) {
     // 用户取消或出错
   }
+}
+
+const copyProject = async (id: number) => {
+  try {
+    await ElMessageBox.confirm('复制项目将保留项目信息和标准砝码检查，不复制样品数据', '复制项目', {
+      type: 'info',
+      confirmButtonText: '复制',
+      cancelButtonText: '取消'
+    })
+    const result = await window.electronAPI.copyProject(id)
+    // 获取新创建的项目详情并添加到列表
+    const newProject = await window.electronAPI.getProject(result.id)
+    projects.value.unshift(newProject)
+    selectedProjectId.value = result.id
+    ElMessage.success('项目已复制')
+  } catch (e) {
+    // 用户取消或出错
+  }
+}
+
+const handleProjectDelete = async (id: number) => {
+  await deleteProject(id)
 }
 
 onMounted(() => {
@@ -245,6 +287,22 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.project-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.project-item:hover .project-actions {
+  opacity: 1;
+}
+
+.project-actions .el-button {
+  width: 24px;
+  height: 24px;
 }
 
 .project-name {
