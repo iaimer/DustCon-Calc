@@ -3,7 +3,6 @@
     <ProjectInfoForm
       ref="projectFormRef"
       :project-id="projectId"
-      @delete="emit('delete', projectId)"
       @save="onProjectSave"
       @envChange="onEnvChange"
     />
@@ -29,7 +28,7 @@ import SampleTable from '../components/samples/SampleTable.vue'
 import type { ProjectFormData } from '../types/project'
 
 const props = defineProps<{ projectId: number }>()
-const emit = defineEmits(['delete'])
+const emit = defineEmits([])
 
 const projectFormRef = ref<InstanceType<typeof ProjectInfoForm> | null>(null)
 const standardWeightRef = ref<InstanceType<typeof StandardWeightForm> | null>(null)

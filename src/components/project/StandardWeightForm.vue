@@ -49,9 +49,12 @@
 </template>
 
 <script setup lang="ts">
+import { toRef } from 'vue'
 import { useStandardWeight } from '../../composables/useStandardWeight'
 
 const props = defineProps<{ projectId: number }>()
+
+const projectIdRef = toRef(props, 'projectId')
 
 const {
   standardWeightForm,
@@ -59,7 +62,7 @@ const {
   standardWeightDiff,
   loadStandardWeight,
   saveStandardWeight
-} = useStandardWeight(props.projectId)
+} = useStandardWeight(projectIdRef)
 
 const formData = standardWeightForm
 

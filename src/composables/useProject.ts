@@ -1,11 +1,14 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch, type Ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { needV0Conversion } from '../utils/calculator'
 import type { ProjectFormData } from '../types/project'
 import { createEmptyProjectForm } from '../types/project'
 
-export function useProject(projectId: number) {
+export function useProject(projectId: Ref<number> | number) {
   const projectForm = ref<ProjectFormData>(createEmptyProjectForm())
+
+  // 获取当前projectId（支持响应式和静态值）
+  const getProjectId = () => typeof projectId === 'number' ? projectId : projectId.value
 
   // 采样日期（两个独立选择器）
   const samplingDateStart = ref<string | null>(null)
@@ -44,7 +47,8 @@ export function useProject(projectId: number) {
   // 加载项目
   const loadProject = async () => {
     try {
-      const project = await window.electronAPI.getProject(projectId)
+      const id = getProjectId()
+      const project = await window.electronAPI.getProject(id)
       if (project) {
         projectForm.value = {
           employer_name: project.employer_name || '',
@@ -77,7 +81,10 @@ export function useProject(projectId: number) {
   // 保存项目
   const saveProject = async () => {
     try {
-      await window.electronAPI.updateProject(projectId, projectForm.value)
+      const id = getProjectId()
+      // 转换为纯对象，避免 Vue 响应式代理导致的序列化问题
+      const data = JSON.parse(JSON.stringify(projectForm.value))
+      await window.electronAPI.updateProject(id, data)
       ElMessage.success('项目已保存')
     } catch (e: any) {
       console.error('保存失败:', e)

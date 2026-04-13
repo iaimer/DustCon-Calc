@@ -67,7 +67,6 @@
         <ProjectDetail
           v-if="selectedProjectId"
           :project-id="selectedProjectId"
-          @delete="handleProjectDelete"
         />
         <div v-else class="empty-state">
           <el-empty description="请选择或创建一个项目" />
@@ -176,10 +175,6 @@ const copyProject = async (id: number) => {
   } catch (e) {
     // 用户取消或出错
   }
-}
-
-const handleProjectDelete = async (id: number) => {
-  await deleteProject(id)
 }
 
 onMounted(() => {

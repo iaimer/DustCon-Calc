@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   calculateV0,
@@ -16,9 +16,12 @@ import {
 import type { SampleRowData } from '../types/sample'
 import { createEmptySampleRow, VALID_SAMPLING_VOLUMES } from '../types/sample'
 
-export function useSamples(projectId: number) {
+export function useSamples(projectId: Ref<number> | number) {
   const samples = ref<SampleRowData[]>([])
   const isTranscriptionView = ref(false)
+
+  // 获取当前projectId（支持响应式和静态值）
+  const getProjectId = () => typeof projectId === 'number' ? projectId : projectId.value
 
   // 采样温度和气压（用于计算V0）
   const samplingTemp = ref<number | null>(null)
@@ -49,8 +52,22 @@ export function useSamples(projectId: number) {
   // 加载样品数据
   const loadSamples = async () => {
     try {
-      const data = await window.electronAPI.getSamples(projectId)
-      samples.value = (data || []) as SampleRowData[]
+      const id = getProjectId()
+      const data = await window.electronAPI.getSamples(id)
+      // 加载时重新计算样品类型和检出状态（确保与当前逻辑一致）
+      samples.value = (data || []).map((row: SampleRowData) => {
+        const sampleType = getSampleType(row.sample_no || '')
+        let isDetected = row.is_detected
+        // 重新计算检出状态
+        if (row.concentration !== null && row.concentration !== undefined && !isNaN(row.concentration)) {
+          isDetected = checkIsDetected(row.concentration, sampleType, row.vt || 500)
+        }
+        return {
+          ...row,
+          sample_type: sampleType,
+          is_detected: isDetected
+        }
+      }) as SampleRowData[]
     } catch (e) {
       ElMessage.error('加载样品数据失败')
     }
@@ -93,7 +110,8 @@ export function useSamples(projectId: number) {
 
     // 保存到数据库
     try {
-      const sampleData = {
+      const pid = getProjectId()
+      const sampleData = JSON.parse(JSON.stringify({
         sample_type: row.sample_type,
         sample_no: row.sample_no,
         filter_no: row.filter_no,
@@ -110,13 +128,13 @@ export function useSamples(projectId: number) {
         concentration: row.concentration,
         rounded_value: row.rounded_value,
         is_detected: row.is_detected
-      }
+      }))
       if (row.id) {
         await window.electronAPI.updateSample(row.id, sampleData)
       } else {
         const result = await window.electronAPI.createSample({
           ...sampleData,
-          project_id: projectId
+          project_id: pid
         })
         row.id = result.id
       }
@@ -127,8 +145,9 @@ export function useSamples(projectId: number) {
 
   // 添加样品行
   const addSampleRows = (count: number = 1) => {
+    const pid = getProjectId()
     for (let i = 0; i < count; i++) {
-      samples.value.push(createEmptySampleRow(projectId))
+      samples.value.push(createEmptySampleRow(pid))
     }
   }
 

@@ -321,6 +321,7 @@
 </template>
 
 <script setup lang="ts">
+import { toRef } from 'vue'
 import { Delete } from '@element-plus/icons-vue'
 import { useSamples } from '../../composables/useSamples'
 import { useSampleTableNavigation } from '../../composables/useSampleTableNavigation'
@@ -328,6 +329,8 @@ import { usePasteHandler } from '../../composables/usePasteHandler'
 
 const props = defineProps<{ projectId: number }>()
 const emit = defineEmits(['envChange'])
+
+const projectIdRef = toRef(props, 'projectId')
 
 const {
   samples,
@@ -348,7 +351,7 @@ const {
   handleWChange,
   handleWBlur,
   recalculateAllV0
-} = useSamples(props.projectId)
+} = useSamples(projectIdRef)
 
 const {
   currentCell,

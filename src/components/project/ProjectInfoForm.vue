@@ -3,11 +3,6 @@
     <template #header>
       <div class="card-header">
         <span>项目信息</span>
-        <div class="header-actions">
-          <el-button type="danger" size="small" @click="$emit('delete')">
-            删除项目
-          </el-button>
-        </div>
       </div>
     </template>
 
@@ -188,22 +183,26 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, toRef } from 'vue'
 import { useProject } from '../../composables/useProject'
 import { useNumericInput } from '../../composables/useNumericInput'
 import { needV0Conversion } from '../../utils/calculator'
 import type { ProjectFormData } from '../../types/project'
 
 const props = defineProps<{ projectId: number }>()
-const emit = defineEmits(['delete', 'save', 'envChange'])
+const emit = defineEmits(['save', 'envChange'])
+
+// 使用 toRef 将 props.projectId 转为响应式引用
+const projectIdRef = toRef(props, 'projectId')
 
 const {
   projectForm,
   samplingDateStart,
   samplingDateEnd,
   handleSamplingDateChange,
+  loadProject,
   saveProject
-} = useProject(props.projectId)
+} = useProject(projectIdRef)
 
 const { tempInputs, handleNumberInput, handleNumberBlur, initTempInputs } = useNumericInput()
 
@@ -232,7 +231,7 @@ const handleBlur = (field: keyof typeof tempInputs.value) => {
 
 // 初始化
 const init = async () => {
-  await (useProject(props.projectId).loadProject())
+  await loadProject()
   initTempInputs({
     sampling_temperature: formData.value.sampling_temperature,
     sampling_air_pressure: formData.value.sampling_air_pressure,
@@ -254,9 +253,5 @@ defineExpose({ init, formData })
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-.header-actions {
-  display: flex;
-  gap: 10px;
 }
 </style>
