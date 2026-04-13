@@ -214,14 +214,22 @@ describe('检出判断', () => {
     expect(checkIsDetected(0.5, '空白', 500)).toBe('-')
   })
 
-  it('浓度≤最低定量浓度显示未检出', () => {
-    expect(checkIsDetected(0.2, '样品', 500)).toBe('未检出')
+  it('浓度<最低定量浓度显示未检出', () => {
     expect(checkIsDetected(0.1, '样品', 500)).toBe('未检出')
+    expect(checkIsDetected(0.19, '样品', 500)).toBe('未检出')
   })
 
-  it('浓度>最低定量浓度显示检出', () => {
+  it('浓度≥最低定量浓度显示检出', () => {
+    expect(checkIsDetected(0.2, '样品', 500)).toBe('检出')  // 等于最低定量浓度
     expect(checkIsDetected(0.21, '样品', 500)).toBe('检出')
     expect(checkIsDetected(1.0, '样品', 500)).toBe('检出')
+  })
+
+  it('修约后等于最低定量浓度但实际浓度大于时显示检出', () => {
+    // 实际浓度0.25修约后为0.2（银行家舍入），但用实际浓度判断应检出
+    expect(checkIsDetected(0.25, '样品', 500)).toBe('检出')
+    // 验证修约结果确实等于最低定量浓度
+    expect(roundBank(0.25, 1)).toBe(0.2)
   })
 })
 

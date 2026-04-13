@@ -182,18 +182,24 @@ describe('模拟数据完整计算流程测试', () => {
   })
 
   describe('修约算法边界值测试', () => {
-    it('检测值修约恰好等于最低定量浓度时判定未检出', () => {
+    it('检测实际浓度等于最低定量浓度时判定检出', () => {
       // 500L: 最低定量浓度 0.2
-      // 检测值恰好 0.2 时应判定为未检出
-      const roundedValue = 0.2
-      const result = checkIsDetected(roundedValue, '样品', 500)
-      expect(result).toBe('未检出')
+      // 实际浓度恰好 0.2 时应判定为检出（≥最低定量浓度）
+      const concentration = 0.2
+      const result = checkIsDetected(concentration, '样品', 500)
+      expect(result).toBe('检出')
     })
 
-    it('检测值略高于最低定量浓度时判定检出', () => {
-      const roundedValue = 0.21
-      const result = checkIsDetected(roundedValue, '样品', 500)
+    it('检测实际浓度略高于最低定量浓度时判定检出', () => {
+      const concentration = 0.21
+      const result = checkIsDetected(concentration, '样品', 500)
       expect(result).toBe('检出')
+    })
+
+    it('检测实际浓度低于最低定量浓度时判定未检出', () => {
+      const concentration = 0.19
+      const result = checkIsDetected(concentration, '样品', 500)
+      expect(result).toBe('未检出')
     })
 
     it('四舍六入五成双精确测试', () => {

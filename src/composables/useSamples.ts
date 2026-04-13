@@ -88,7 +88,7 @@ export function useSamples(projectId: number) {
     if (row.delta_m !== null && row.v0 !== null) {
       row.concentration = calculateConcentration(row.delta_m, row.v0)
       row.rounded_value = calculateRoundedValue(row.concentration, row.vt)
-      row.is_detected = checkIsDetected(row.rounded_value, row.sample_type, row.vt)
+      row.is_detected = checkIsDetected(row.concentration, row.sample_type, row.vt)
     }
 
     // 保存到数据库
@@ -241,7 +241,7 @@ export function useSamples(projectId: number) {
         if (sample.delta_m !== null && sample.delta_m !== undefined) {
           sample.concentration = calculateConcentration(sample.delta_m, sample.v0)
           sample.rounded_value = calculateRoundedValue(sample.concentration, sample.vt)
-          sample.is_detected = checkIsDetected(sample.rounded_value, sample.sample_type, sample.vt)
+          sample.is_detected = checkIsDetected(sample.concentration, sample.sample_type, sample.vt)
         }
       }
     })

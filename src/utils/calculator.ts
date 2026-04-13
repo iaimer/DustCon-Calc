@@ -205,19 +205,19 @@ export function calculateRoundedValue(concentration: number, vt: number): number
  *
  * 规则：
  * - 空白样品显示"-"
- * - 浓度≤最低定量浓度显示"未检出"
- * - 其他显示"检出"
+ * - 检测实际浓度<最低定量浓度显示"未检出"
+ * - 检测实际浓度≥最低定量浓度显示"检出"
  */
 export function checkIsDetected(
-  roundedValue: number,
+  concentration: number,
   sampleType: '空白' | '样品',
   vt: number
 ): '-' | '未检出' | '检出' | '' {
-  if (roundedValue === null || isNaN(roundedValue)) return ''
+  if (concentration === null || isNaN(concentration)) return ''
   if (sampleType === '空白') return '-'
 
   const minQuantitative = getMinQuantitativeConcentration(vt)
-  return roundedValue <= minQuantitative ? '未检出' : '检出'
+  return concentration < minQuantitative ? '未检出' : '检出'
 }
 
 /**
@@ -277,7 +277,7 @@ export function calculateSample(
   const v0 = calculateV0(input.vt, temperature, pressure)
   const concentration = calculateConcentration(deltaM, v0)
   const roundedValue = calculateRoundedValue(concentration, input.vt)
-  const isDetected = checkIsDetected(roundedValue, sampleType, input.vt)
+  const isDetected = checkIsDetected(concentration, sampleType, input.vt)
 
   return {
     sample_type: sampleType,
