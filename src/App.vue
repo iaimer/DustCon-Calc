@@ -82,6 +82,7 @@ import { Plus, Search, ArrowLeft, ArrowRight, Delete, DocumentCopy } from '@elem
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ProjectDetail from './views/ProjectDetail.vue'
 import dayjs from 'dayjs'
+import { tauriAPI } from './api/tauri'
 
 const projects = ref<any[]>([])
 const selectedProjectId = ref<number | null>(null)
@@ -103,7 +104,7 @@ const formatDate = (date: string) => {
 
 const loadProjects = async () => {
   try {
-    projects.value = await window.electronAPI.getProjects()
+    projects.value = await tauriAPI.getProjects()
   } catch (e) {
     ElMessage.error('加载项目列表失败')
   }
@@ -129,7 +130,7 @@ const createNewProject = async () => {
       analyst: '',
       reviewer: ''
     }
-    const result = await window.electronAPI.createProject(projectData)
+    const result = await tauriAPI.createProject(projectData)
     projects.value.unshift(result)
     selectedProjectId.value = result.id
     ElMessage.success('项目创建成功')
@@ -148,7 +149,7 @@ const deleteProject = async (id: number) => {
     await ElMessageBox.confirm('确定删除该项目及其所有样品数据？', '删除确认', {
       type: 'warning'
     })
-    await window.electronAPI.deleteProject(id)
+    await tauriAPI.deleteProject(id)
     projects.value = projects.value.filter(p => p.id !== id)
     if (selectedProjectId.value === id) {
       selectedProjectId.value = null
@@ -166,9 +167,8 @@ const copyProject = async (id: number) => {
       confirmButtonText: '复制',
       cancelButtonText: '取消'
     })
-    const result = await window.electronAPI.copyProject(id)
-    // 获取新创建的项目详情并添加到列表
-    const newProject = await window.electronAPI.getProject(result.id)
+    const result = await tauriAPI.copyProject(id)
+    const newProject = await tauriAPI.getProject(result.id)
     projects.value.unshift(newProject)
     selectedProjectId.value = result.id
     ElMessage.success('项目已复制')
@@ -181,6 +181,16 @@ onMounted(() => {
   loadProjects()
 })
 </script>
+
+<style>
+body {
+  font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.el-message-box, .el-dialog, .el-form-item__label, .el-input__inner, .el-button, .el-table {
+  font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+</style>
 
 <style scoped>
 .app-container {

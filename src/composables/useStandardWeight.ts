@@ -3,6 +3,7 @@ import { ElMessage } from 'element-plus'
 import { checkStandardWeight } from '../utils/calculator'
 import type { StandardWeightFormData } from '../types/standardWeight'
 import { createEmptyStandardWeightForm } from '../types/standardWeight'
+import { tauriAPI } from '../api/tauri'
 
 export function useStandardWeight(projectId: Ref<number> | number) {
   const standardWeightForm = ref<StandardWeightFormData>(createEmptyStandardWeightForm())
@@ -34,7 +35,7 @@ export function useStandardWeight(projectId: Ref<number> | number) {
   const loadStandardWeight = async () => {
     try {
       const id = getProjectId()
-      const weight = await window.electronAPI.getStandardWeight(id)
+      const weight = await tauriAPI.getStandardWeight(id)
       if (weight) {
         standardWeightForm.value = {
           id: weight.id,
@@ -62,14 +63,11 @@ export function useStandardWeight(projectId: Ref<number> | number) {
         check_result: standardWeightResult.value
       }
       if (standardWeightForm.value.id) {
-        await window.electronAPI.updateStandardWeight(
-          standardWeightForm.value.id,
-          JSON.parse(JSON.stringify(data))
-        )
+        await tauriAPI.updateStandardWeightFromUpdateData(standardWeightForm.value.id, data)
       } else {
-        const result = await window.electronAPI.createStandardWeight({
+        const result = await tauriAPI.createStandardWeightFromCreateData({
           project_id: id,
-          ...JSON.parse(JSON.stringify(data))
+          ...data
         })
         standardWeightForm.value.id = result.id
       }

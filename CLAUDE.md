@@ -4,75 +4,92 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-粉尘浓度计算器 - An Electron desktop application for recording and calculating workplace dust concentration measurements. Based on GBZ/T 192 standards.
+粉尘浓度计算器 - A Tauri desktop application for recording and calculating workplace dust concentration measurements. Based on GBZ/T 192 standards. Apple Silicon only.
 
 ## Commands
 
 ```bash
-npm run dev          # Start development server with Electron
-npm run test         # Run unit tests once
+npm run dev          # Start frontend dev server
+npm run tauri:dev    # Start Tauri development mode
+npm run build        # Build frontend only
+npm run tauri:build  # Build production DMG (aarch64)
+npm run test         # Run unit tests
 npm run test:watch   # Run tests in watch mode
-npm run build        # Build for production (TypeScript check + Vite build + Electron builder)
 ```
 
 ## Architecture
 
-### Electron IPC Pattern
+### Tauri IPC Pattern
 
-The app uses Electron's IPC (Inter-Process Communication) for database operations:
+The app uses Tauri Commands for database operations:
 
 ```
 ┌─────────────────┐         ┌─────────────────┐
-│  Renderer (Vue) │  IPC    │  Main Process   │
-│  src/           │ ◄─────► │  electron/      │
+│  Frontend (Vue) │ invoke  │  Rust Backend   │
+│  src/           │ ◄─────► │  src-tauri/     │
 │                 │         │                 │
-│  Vue 3 +        │         │  sql.js         │
+│  Vue 3 +        │         │  rusqlite       │
 │  Element Plus   │         │  SQLite DB      │
 └─────────────────┘         └─────────────────┘
 ```
 
-- **Main process** (`electron/main.ts`): Handles all SQLite database operations via IPC handlers
-- **Preload script** (`electron/preload.ts`): Exposes `window.electronAPI` to renderer
-- **Renderer** (`src/`): Vue 3 application with Element Plus UI
+- **Rust backend** (`src-tauri/src/`): Handles all SQLite operations via Tauri Commands
+- **Frontend** (`src/`): Vue 3 application with Element Plus UI, calls `tauriAPI.*`
 
-### Frontend Architecture (Composables Pattern)
-
-The frontend follows Vue 3 Composition API best practices with composables:
+### Directory Structure
 
 ```
+src-tauri/
+├── Cargo.toml              # Rust dependencies
+├── tauri.conf.json         # Tauri configuration
+├── icons/                  # App icons (icns, png)
+└── src/
+    ├── main.rs             # App entry
+    ├── lib.rs              # Tauri setup + handler registration
+    ├── db/
+    │   └── mod.rs          # SQLite connection + migrations
+    └── commands/
+        ├── mod.rs
+        ├── projects.rs     # Project CRUD commands
+        ├── samples.rs      # Sample CRUD commands
+        └── standard_weights.rs
+
 src/
+├── api/
+│   └── tauri.ts            # Tauri invoke wrapper
 ├── views/
-│   └── ProjectDetail.vue      # Main view (~70 lines, orchestrates components)
+│   └── ProjectDetail.vue   # Main view
 ├── components/
 │   ├── project/
-│   │   ├── ProjectInfoForm.vue    # Project metadata form
-│   │   └── StandardWeightForm.vue # Standard weight verification
 │   └── samples/
-│       └── SampleTable.vue        # Sample data table (full + transcription view)
 ├── composables/
-│   ├── useProject.ts              # Project data management
-│   ├── useSamples.ts              # Sample data management
-│   ├── useStandardWeight.ts       # Standard weight management
-│   ├── useSampleTableNavigation.ts # Excel-style keyboard navigation
-│   ├── usePasteHandler.ts         # Clipboard paste handling
-│   └── useNumericInput.ts         # Numeric input with decimal support
+│   ├── useProject.ts
+│   ├── useSamples.ts
+│   └── useStandardWeight.ts
 ├── types/
-│   ├── project.ts                 # Project type definitions
-│   ├── sample.ts                  # Sample type definitions
-│   ├── standardWeight.ts          # Standard weight types
-│   └── electron.d.ts              # Electron API types
+│   ├── project.ts
+│   ├── sample.ts
+│   └── standardWeight.ts
 └── utils/
-    └── calculator.ts              # Core calculation logic
+    └── calculator.ts       # Core calculation logic
 ```
 
 ### Database
 
-SQLite via `sql.js` (WebAssembly-based, no native compilation needed). Database stored at `app.getPath('userData')/dust-calculator.db`.
+SQLite via `rusqlite` (native, bundled). Database path: `~/Library/Application Support/dust-calculator/dust-calculator.db`
 
 **Tables:**
 - `projects`: Test project metadata (employer, date, environment parameters)
 - `samples`: Individual sample measurements with calculated values
 - `standard_weights`: Standard weight verification records
+
+### Tauri Commands (14 total)
+
+| Category | Commands |
+|----------|----------|
+| Projects | `get_projects`, `get_project`, `create_project`, `update_project`, `delete_project`, `copy_project` |
+| Samples | `get_samples`, `create_sample`, `update_sample`, `delete_sample`, `batch_create_samples` |
+| StandardWeights | `get_standard_weight`, `create_standard_weight`, `update_standard_weight` |
 
 ### Core Calculation Module
 
@@ -87,21 +104,9 @@ SQLite via `sql.js` (WebAssembly-based, no native compilation needed). Database 
 - 500L: detection value rounded to 1 decimal, min quantitative concentration = 0.2 mg/m³
 - Others: detection value rounded to 2 decimals
 
-### Key Files
-
-| File | Purpose |
-|------|---------|
-| `electron/main.ts` | Electron main process + all IPC handlers + SQLite |
-| `electron/preload.ts` | Exposes database API to renderer |
-| `src/App.vue` | Main layout with project list sidebar |
-| `src/views/ProjectDetail.vue` | Orchestrates child components |
-| `src/utils/calculator.ts` | All calculation functions - add new formulas here |
-| `src/composables/*.ts` | Business logic composables |
-| `src/components/**/*.vue` | UI components |
-
 ## Notes
 
-- sql.js is externalized in Vite config to avoid bundling issues
-- WASM file loaded from `node_modules/sql.js/dist/sql-wasm.wasm`
+- Build target: `aarch64-apple-darwin` (Apple Silicon only)
+- App size: ~4MB DMG (vs ~150MB Electron)
+- Database migrations run automatically on startup (ALTER TABLE for legacy data)
 - Tests verify the banker's rounding algorithm matches GB/T 8170 standard exactly
-- When adding new features, create new composables in `src/composables/` and components in `src/components/`

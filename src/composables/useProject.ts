@@ -3,6 +3,7 @@ import { ElMessage } from 'element-plus'
 import { needV0Conversion } from '../utils/calculator'
 import type { ProjectFormData } from '../types/project'
 import { createEmptyProjectForm } from '../types/project'
+import { tauriAPI } from '../api/tauri'
 
 export function useProject(projectId: Ref<number> | number) {
   const projectForm = ref<ProjectFormData>(createEmptyProjectForm())
@@ -48,7 +49,7 @@ export function useProject(projectId: Ref<number> | number) {
   const loadProject = async () => {
     try {
       const id = getProjectId()
-      const project = await window.electronAPI.getProject(id)
+      const project = await tauriAPI.getProject(id)
       if (project) {
         projectForm.value = {
           employer_name: project.employer_name || '',
@@ -84,7 +85,7 @@ export function useProject(projectId: Ref<number> | number) {
       const id = getProjectId()
       // 转换为纯对象，避免 Vue 响应式代理导致的序列化问题
       const data = JSON.parse(JSON.stringify(projectForm.value))
-      await window.electronAPI.updateProject(id, data)
+      await tauriAPI.updateProject(id, data)
       ElMessage.success('项目已保存')
     } catch (e: any) {
       console.error('保存失败:', e)

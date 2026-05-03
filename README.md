@@ -1,6 +1,6 @@
 # 粉尘浓度计算器
 
-基于 GBZ/T 192 标准的粉尘浓度分析记录桌面应用。
+基于 GBZ/T 192 标准的粉尘浓度分析记录桌面应用。Apple Silicon 原生应用，体积仅 ~4MB。
 
 ## 产品特性
 
@@ -8,7 +8,7 @@
 
 - **四舍六入五成双修约**：严格遵循 GB/T 8170 国家标准的数值修约规则
 - **V0 自动换算**：当采样温度超出 5-35℃ 或气压超出 98.8-103.4 kPa 时，自动计算标准采样体积
-- **多采样体积支持**：500L、300L、420L、450L、525L，自动匹配对应精度
+- **多采样体积支持**：500L、300L、420L、450L、480L、525L，自动匹配对应精度
 
 ### 🔬 质控判定
 
@@ -45,16 +45,16 @@
 
 ```bash
 npm install
-npm run dev
+npm run tauri:dev
 ```
 
 ### 构建发布版本
 
 ```bash
-npm run build
+npm run tauri:build
 ```
 
-构建产物位于 `release/` 目录。
+构建产物位于 `src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/` 目录。
 
 ## 使用方法
 
@@ -113,9 +113,11 @@ npm run build
 
 ## 技术架构
 
-- **前端**：Vue 3 + Element Plus
-- **后端**：Electron + sql.js（WebAssembly SQLite）
-- **数据存储**：本地 SQLite 文件（`userData/dust-calculator.db`）
+- **前端**：Vue 3 + Element Plus + TypeScript
+- **后端**：Tauri (Rust) + rusqlite
+- **数据存储**：本地 SQLite（`~/Library/Application Support/dust-calculator/`）
+- **应用体积**：~4MB（原生性能，无 Chromium 运行时）
+- **支持平台**：Apple Silicon (arm64)
 
 ## 检测标准依据
 

@@ -15,6 +15,7 @@ import {
 } from '../utils/calculator'
 import type { SampleRowData } from '../types/sample'
 import { createEmptySampleRow, VALID_SAMPLING_VOLUMES } from '../types/sample'
+import { tauriAPI } from '../api/tauri'
 
 export function useSamples(projectId: Ref<number> | number) {
   const samples = ref<SampleRowData[]>([])
@@ -53,7 +54,7 @@ export function useSamples(projectId: Ref<number> | number) {
   const loadSamples = async () => {
     try {
       const id = getProjectId()
-      const data = await window.electronAPI.getSamples(id)
+      const data = await tauriAPI.getSamples(id)
       // 加载时重新计算样品类型和检出状态（确保与当前逻辑一致）
       samples.value = (data || []).map((row: SampleRowData) => {
         const sampleType = getSampleType(row.sample_no || '')
@@ -111,31 +112,10 @@ export function useSamples(projectId: Ref<number> | number) {
     // 保存到数据库
     try {
       const pid = getProjectId()
-      const sampleData = JSON.parse(JSON.stringify({
-        sample_type: row.sample_type,
-        sample_no: row.sample_no,
-        filter_no: row.filter_no,
-        w1: typeof row.w1 === 'string' ? parseFloat(row.w1) || null : row.w1,
-        w2_first: typeof row.w2_first === 'string' ? parseFloat(row.w2_first) || null : row.w2_first,
-        w2_second: typeof row.w2_second === 'string' ? parseFloat(row.w2_second) || null : row.w2_second,
-        w2_avg: row.w2_avg,
-        weighing_diff: row.weighing_diff,
-        weighing_qc: row.weighing_qc,
-        delta_m: row.delta_m,
-        delta_m_qc: row.delta_m_qc,
-        vt: row.vt,
-        v0: row.v0,
-        concentration: row.concentration,
-        rounded_value: row.rounded_value,
-        is_detected: row.is_detected
-      }))
       if (row.id) {
-        await window.electronAPI.updateSample(row.id, sampleData)
+        await tauriAPI.updateSampleFromRow(row)
       } else {
-        const result = await window.electronAPI.createSample({
-          ...sampleData,
-          project_id: pid
-        })
+        const result = await tauriAPI.createSampleFromRow(pid, row)
         row.id = result.id
       }
     } catch {
@@ -173,7 +153,7 @@ export function useSamples(projectId: Ref<number> | number) {
     try {
       await ElMessageBox.confirm('确定删除该样品记录？', '删除确认', { type: 'warning' })
       if (row.id) {
-        await window.electronAPI.deleteSample(row.id)
+        await tauriAPI.deleteSample(row.id)
       }
       samples.value.splice(index, 1)
       ElMessage.success('已删除')
@@ -192,7 +172,7 @@ export function useSamples(projectId: Ref<number> | number) {
       )
       for (const sample of samples.value) {
         if (sample.id) {
-          await window.electronAPI.deleteSample(sample.id)
+          await tauriAPI.deleteSample(sample.id)
         }
       }
       samples.value = []
