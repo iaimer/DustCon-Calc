@@ -99,10 +99,18 @@ SQLite via `rusqlite` (native, bundled). Database path: `~/Library/Application S
 - **V0 conversion**: Standard volume adjustment when temperature < 5°C or > 35°C, or pressure outside 98.8-103.4 kPa
 - **Sample type detection**: Samples with "-0-" in the ID are blank samples
 - **QC checks**: Weighing QC (diff ≤ 0.2mg), blank delta_m QC (≤ 0.02mg), sample delta_m QC (> 0.1mg)
+- **Detection limit edge case**: When raw concentration < min quant but rounded ≥ min quant, floor instead of Banker's round to avoid contradiction
 
 **Sampling volumes**: 500L, 300L, 420L, 450L, 480L, 525L
 - 500L: detection value rounded to 1 decimal, min quantitative concentration = 0.2 mg/m³
 - Others: detection value rounded to 2 decimals
+
+### QC Display
+
+QC status is displayed **inline** (not as separate columns):
+- **Weighing QC fail** → W₂ input cells get red background (`w2-qc-fail`), average gets red text
+- **Delta_m QC fail** → Δm cell gets red text
+- **Not detected** → 检测值 column shows "未检出" in gray italic
 
 ## Notes
 
@@ -110,3 +118,5 @@ SQLite via `rusqlite` (native, bundled). Database path: `~/Library/Application S
 - App size: ~4MB DMG (vs ~150MB Electron)
 - Database migrations run automatically on startup (ALTER TABLE for legacy data)
 - Tests verify the banker's rounding algorithm matches GB/T 8170 standard exactly
+- `empty_to_null` utility lives in `commands/mod.rs` (shared by all 3 command modules)
+- `get_connection()` returns `Result<MutexGuard, String>` — never panics, callers use `?`

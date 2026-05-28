@@ -213,7 +213,6 @@ body {
 
 .sidebar {
   background: #fff;
-  border-right: 1px solid #e4e7ed;
   display: flex;
   flex-direction: column;
   transition: width 0.3s ease;
@@ -233,22 +232,25 @@ body {
 }
 
 .sidebar-toggle {
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 48px;
   background: #fff;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   position: absolute;
-  left: 288px;
+  left: 300px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 100;
   transition: all 0.25s ease;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  box-shadow: 1px 0 4px rgba(0, 0, 0, 0.08);
   color: #909399;
+  border-radius: 0 4px 4px 0;
+}
+.sidebar-toggle.collapsed {
+  left: 0;
 }
 
 .sidebar-toggle.collapsed {
@@ -335,7 +337,7 @@ body {
 
 .main-content {
   background: #f5f7fa;
-  padding: 20px;
+  padding: 0 0 20px;
 }
 
 .empty-state {

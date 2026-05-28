@@ -1,16 +1,23 @@
 <template>
   <div class="project-detail">
-    <ProjectInfoForm
-      ref="projectFormRef"
-      :project-id="projectId"
-      @save="onProjectSave"
-      @envChange="onEnvChange"
-    />
-
-    <StandardWeightForm
-      ref="standardWeightRef"
-      :project-id="projectId"
-    />
+    <div class="collapsible-panels">
+      <el-collapse v-model="activePanels">
+        <el-collapse-item title="项目信息" name="project">
+          <ProjectInfoForm
+            ref="projectFormRef"
+            :project-id="projectId"
+            @save="onProjectSave"
+            @envChange="onEnvChange"
+          />
+        </el-collapse-item>
+        <el-collapse-item title="标准砝码检查" name="standardWeight">
+          <StandardWeightForm
+            ref="standardWeightRef"
+            :project-id="projectId"
+          />
+        </el-collapse-item>
+      </el-collapse>
+    </div>
 
     <SampleTable
       ref="sampleTableRef"
@@ -26,6 +33,8 @@ import ProjectInfoForm from '../components/project/ProjectInfoForm.vue'
 import StandardWeightForm from '../components/project/StandardWeightForm.vue'
 import SampleTable from '../components/samples/SampleTable.vue'
 import type { ProjectFormData } from '../types/project'
+
+const activePanels = ref<string[]>([])
 
 const props = defineProps<{ projectId: number }>()
 const emit = defineEmits(['projectSaved'])
@@ -66,5 +75,16 @@ onMounted(loadAllData)
 <style scoped>
 .project-detail {
   max-width: 1400px;
+}
+.collapsible-panels {
+  margin-bottom: 12px;
+}
+.collapsible-panels :deep(.el-collapse-item__content) {
+  padding-bottom: 0;
+}
+.collapsible-panels :deep(.el-card) {
+  margin-bottom: 0;
+  border: none;
+  box-shadow: none;
 }
 </style>

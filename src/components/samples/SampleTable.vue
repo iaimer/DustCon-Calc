@@ -39,7 +39,7 @@
       v-show="!isTranscriptionView"
       :data="samples"
       border
-      height="400"
+      :height="tableHeight"
       :row-class-name="getRowClassName"
       @paste.capture.prevent="handlePaste"
       class="excel-table"
@@ -239,7 +239,7 @@
       :data="samples"
       border
       stripe
-      height="400"
+      :height="tableHeight"
       highlight-current-row
       :row-class-name="getRowClassName"
       class="excel-table"
@@ -324,11 +324,22 @@
 </template>
 
 <script setup lang="ts">
-import { toRef } from 'vue'
+import { ref, toRef, computed, onMounted, onUnmounted } from 'vue'
 import { Delete } from '@element-plus/icons-vue'
 import { useSamples } from '../../composables/useSamples'
 import { useSampleTableNavigation } from '../../composables/useSampleTableNavigation'
 import { usePasteHandler } from '../../composables/usePasteHandler'
+
+const viewportHeight = ref(window.innerHeight)
+
+const updateViewportHeight = () => {
+  viewportHeight.value = window.innerHeight
+}
+
+onMounted(() => window.addEventListener('resize', updateViewportHeight))
+onUnmounted(() => window.removeEventListener('resize', updateViewportHeight))
+
+const tableHeight = computed(() => viewportHeight.value - 260)
 
 const props = defineProps<{ projectId: number }>()
 const emit = defineEmits(['envChange'])
