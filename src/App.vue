@@ -67,6 +67,7 @@
         <ProjectDetail
           v-if="selectedProjectId"
           :project-id="selectedProjectId"
+          @project-saved="onProjectSaved"
         />
         <div v-else class="empty-state">
           <el-empty description="请选择或创建一个项目" />
@@ -83,8 +84,9 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import ProjectDetail from './views/ProjectDetail.vue'
 import dayjs from 'dayjs'
 import { tauriAPI } from './api/tauri'
+import type { Project } from './types/project'
 
-const projects = ref<any[]>([])
+const projects = ref<Project[]>([])
 const selectedProjectId = ref<number | null>(null)
 const searchKeyword = ref('')
 const sidebarCollapsed = ref(false)
@@ -98,7 +100,7 @@ const filteredProjects = computed(() => {
   )
 })
 
-const formatDate = (date: string) => {
+const formatDate = (date: string | null) => {
   return date || ''
 }
 
@@ -144,6 +146,10 @@ const selectProject = (id: number) => {
   selectedProjectId.value = id
 }
 
+const onProjectSaved = async () => {
+  await loadProjects()
+}
+
 const deleteProject = async (id: number) => {
   try {
     await ElMessageBox.confirm('确定删除该项目及其所有样品数据？', '删除确认', {
@@ -155,8 +161,11 @@ const deleteProject = async (id: number) => {
       selectedProjectId.value = null
     }
     ElMessage.success('项目已删除')
-  } catch (e) {
-    // 用户取消或出错
+  } catch (e: any) {
+    if (e !== 'cancel' && e?.code !== 'ERR_CANCEL' && !(e instanceof Error && e.message?.includes('cancel'))) {
+      console.error('删除项目失败:', e)
+      ElMessage.error(`删除失败: ${e?.message || '未知错误'}`)
+    }
   }
 }
 
@@ -169,11 +178,14 @@ const copyProject = async (id: number) => {
     })
     const result = await tauriAPI.copyProject(id)
     const newProject = await tauriAPI.getProject(result.id)
-    projects.value.unshift(newProject)
+    if (newProject) projects.value.unshift(newProject)
     selectedProjectId.value = result.id
     ElMessage.success('项目已复制')
-  } catch (e) {
-    // 用户取消或出错
+  } catch (e: any) {
+    if (e !== 'cancel' && e?.code !== 'ERR_CANCEL' && !(e instanceof Error && e.message?.includes('cancel'))) {
+      console.error('复制项目失败:', e)
+      ElMessage.error(`复制失败: ${e?.message || '未知错误'}`)
+    }
   }
 }
 

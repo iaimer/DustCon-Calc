@@ -207,6 +207,22 @@ describe('检测值修约', () => {
     expect(calculateRoundedValue(1.67, 300)).toBe(1.67)
     expect(calculateRoundedValue(1.675, 300)).toBe(1.68) // 四舍六入五成双
   })
+
+  it('低于检出限的浓度不应向上修约至检出限', () => {
+    // 420L: 检出限0.24, 实际浓度0.238, 修约后应为0.23而非0.24
+    expect(calculateRoundedValue(0.238, 420)).toBe(0.23)
+    // 500L: 检出限0.2, 实际浓度0.19, 修约后应为0.1而非0.2
+    expect(calculateRoundedValue(0.19, 500)).toBe(0.1)
+    // 300L: 检出限0.34, 实际浓度0.335, 修约后应为0.33而非0.34
+    expect(calculateRoundedValue(0.335, 300)).toBe(0.33)
+  })
+
+  it('正常检测浓度（大于检出限）正常修约', () => {
+    expect(calculateRoundedValue(0.25, 500)).toBe(0.2)  // 银行家舍入: 0.25→0.2
+    expect(calculateRoundedValue(0.26, 500)).toBe(0.3)  // 常规四舍六入
+    expect(calculateRoundedValue(0.28, 420)).toBe(0.28) // 不变
+    expect(calculateRoundedValue(0.35, 300)).toBe(0.35) // 不变
+  })
 })
 
 describe('检出判断', () => {

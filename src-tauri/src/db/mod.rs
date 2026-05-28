@@ -42,7 +42,7 @@ impl Database {
     }
 
     fn init_tables(&self) -> SqliteResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock().expect("数据库 Mutex 已被毒化");
 
         conn.execute_batch(
             "CREATE TABLE IF NOT EXISTS projects (
@@ -103,7 +103,7 @@ impl Database {
     }
 
     fn run_migrations(&self) -> SqliteResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock().expect("数据库 Mutex 已被毒化");
 
         // 检查 projects 表字段（与 Electron 版保持一致）
         let columns: Vec<String> = conn
@@ -137,7 +137,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn get_connection(&self) -> std::sync::MutexGuard<'_, Connection> {
-        self.conn.lock().unwrap()
+    pub fn get_connection(&self) -> Result<std::sync::MutexGuard<'_, Connection>, String> {
+        self.conn.lock().map_err(|e| format!("数据库连接异常: {}", e))
     }
 }

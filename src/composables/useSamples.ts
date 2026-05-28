@@ -118,7 +118,8 @@ export function useSamples(projectId: Ref<number> | number) {
         const result = await tauriAPI.createSampleFromRow(pid, row)
         row.id = result.id
       }
-    } catch {
+    } catch (e) {
+      console.error('保存样品失败:', e)
       ElMessage.error('保存样品失败')
     }
   }

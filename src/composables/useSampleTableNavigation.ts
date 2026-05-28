@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import type { EditableColumnField } from '../types/sample'
 import { EDITABLE_COLUMNS } from '../types/sample'
 
@@ -19,7 +19,7 @@ export function useSampleTableNavigation(samplesLength: () => number) {
   const focusCell = (rowIndex: number, colIndex: number) => {
     currentCell.value = { row: rowIndex, col: colIndex }
 
-    setTimeout(() => {
+    nextTick(() => {
       const field = getColumnField(colIndex)
       const selector = `[data-cell="${rowIndex}-${field}"]`
       const cellContainer = document.querySelector(selector)
@@ -33,7 +33,7 @@ export function useSampleTableNavigation(samplesLength: () => number) {
           inputEl.select()
         }
       }
-    }, 0)
+    })
   }
 
   // 处理单元格键盘导航

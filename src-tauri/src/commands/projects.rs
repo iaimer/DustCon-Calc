@@ -46,13 +46,11 @@ pub struct ProjectFormData {
     reviewer: String,
 }
 
-fn empty_to_null(s: String) -> Option<String> {
-    if s.is_empty() { None } else { Some(s) }
-}
+use crate::commands::empty_to_null;
 
 #[command]
 pub fn get_projects(db: tauri::State<'_, Database>) -> Result<Vec<Project>, String> {
-    let conn = db.get_connection();
+    let conn = db.get_connection()?;
 
     let mut stmt = conn
         .prepare(
@@ -97,7 +95,7 @@ pub fn get_projects(db: tauri::State<'_, Database>) -> Result<Vec<Project>, Stri
 
 #[command]
 pub fn get_project(db: tauri::State<'_, Database>, id: i64) -> Result<Option<Project>, String> {
-    let conn = db.get_connection();
+    let conn = db.get_connection()?;
 
     let mut stmt = conn
         .prepare(
@@ -141,7 +139,7 @@ pub fn get_project(db: tauri::State<'_, Database>, id: i64) -> Result<Option<Pro
 
 #[command]
 pub fn create_project(db: tauri::State<'_, Database>, data: ProjectFormData) -> Result<Project, String> {
-    let conn = db.get_connection();
+    let conn = db.get_connection()?;
 
     conn.execute(
         "INSERT INTO projects (
@@ -199,7 +197,7 @@ pub fn create_project(db: tauri::State<'_, Database>, data: ProjectFormData) -> 
 
 #[command]
 pub fn update_project(db: tauri::State<'_, Database>, id: i64, data: ProjectFormData) -> Result<Project, String> {
-    let conn = db.get_connection();
+    let conn = db.get_connection()?;
 
     conn.execute(
         "UPDATE projects SET
@@ -258,7 +256,7 @@ pub fn update_project(db: tauri::State<'_, Database>, id: i64, data: ProjectForm
 
 #[command]
 pub fn delete_project(db: tauri::State<'_, Database>, id: i64) -> Result<bool, String> {
-    let conn = db.get_connection();
+    let conn = db.get_connection()?;
 
     // 由于启用了外键约束，删除项目会自动删除关联的 samples 和 standard_weights
     conn.execute("DELETE FROM projects WHERE id = ?", [id])
@@ -269,7 +267,7 @@ pub fn delete_project(db: tauri::State<'_, Database>, id: i64) -> Result<bool, S
 
 #[command]
 pub fn copy_project(db: tauri::State<'_, Database>, id: i64) -> Result<serde_json::Value, String> {
-    let conn = db.get_connection();
+    let conn = db.get_connection()?;
 
     // 获取原项目 - 直接查询而不是调用 get_project
     let project = conn

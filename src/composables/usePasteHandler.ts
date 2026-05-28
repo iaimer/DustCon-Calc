@@ -50,7 +50,8 @@ export function usePasteHandler(
         const vtVal = parseInt(trimmedVal)
         row.vt = (VALID_SAMPLING_VOLUMES as readonly number[]).includes(vtVal) ? vtVal : 500
       } else if (field === 'w1' || field === 'w2_first' || field === 'w2_second') {
-        row[field] = parseFloat(trimmedVal) || null
+        const parsed = parseFloat(trimmedVal)
+        row[field] = trimmedVal === '' || isNaN(parsed) ? null : parsed
       } else {
         (row as unknown as Record<string, unknown>)[field] = trimmedVal
       }

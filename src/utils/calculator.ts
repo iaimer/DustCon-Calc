@@ -197,7 +197,13 @@ export function calculateConcentration(deltaM: number, volume: number): number {
 export function calculateRoundedValue(concentration: number, vt: number): number {
   if (concentration === null || isNaN(concentration)) return NaN
   const decimals = getRoundingDecimals(vt)
-  return roundBank(concentration, decimals)
+  const minQuant = getMinQuantitativeConcentration(vt)
+  const rounded = roundBank(concentration, decimals)
+  if (concentration < minQuant && rounded >= minQuant) {
+    const factor = Math.pow(10, decimals)
+    return Math.floor(concentration * factor) / factor
+  }
+  return rounded
 }
 
 /**

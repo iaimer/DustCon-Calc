@@ -71,7 +71,7 @@ export const tauriAPI = {
   createSampleFromRow: (projectId: number, row: SampleRowData): Promise<SampleRowData> =>
     tauriAPI.createSample(projectId, convertSampleRowToData(row)),
   updateSampleFromRow: (row: SampleRowData): Promise<SampleRowData> =>
-    row.id ? tauriAPI.updateSample(row.id, convertSampleRowToData(row)) : Promise.reject('No sample id'),
+    row.id ? tauriAPI.updateSample(row.id, convertSampleRowToData(row)) : Promise.reject(new Error('No sample id')),
 
   // Standard weights
   getStandardWeight: (projectId: number): Promise<StandardWeight | null> =>

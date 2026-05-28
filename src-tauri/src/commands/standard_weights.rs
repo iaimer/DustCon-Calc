@@ -21,13 +21,11 @@ pub struct StandardWeightData {
     check_result: String,
 }
 
-fn empty_to_null(s: String) -> Option<String> {
-    if s.is_empty() { None } else { Some(s) }
-}
+use crate::commands::empty_to_null;
 
 #[command]
 pub fn get_standard_weight(db: tauri::State<'_, Database>, project_id: i64) -> Result<Option<StandardWeight>, String> {
-    let conn = db.get_connection();
+    let conn = db.get_connection()?;
 
     let result = conn
         .query_row(
@@ -53,7 +51,7 @@ pub fn get_standard_weight(db: tauri::State<'_, Database>, project_id: i64) -> R
 
 #[command]
 pub fn create_standard_weight(db: tauri::State<'_, Database>, project_id: i64, data: StandardWeightData) -> Result<StandardWeight, String> {
-    let conn = db.get_connection();
+    let conn = db.get_connection()?;
 
     let weight_no = empty_to_null(data.weight_no.clone());
     let check_result = empty_to_null(data.check_result.clone());
@@ -85,12 +83,14 @@ pub fn create_standard_weight(db: tauri::State<'_, Database>, project_id: i64, d
 
 #[command]
 pub fn update_standard_weight(db: tauri::State<'_, Database>, id: i64, data: StandardWeightData) -> Result<StandardWeight, String> {
-    let conn = db.get_connection();
+    let conn = db.get_connection()?;
 
     // 获取 project_id
     let project_id: i64 = conn
         .query_row("SELECT project_id FROM standard_weights WHERE id = ?", [id], |row| row.get(0))
-        .map_err(|e| e.to_string())?;
+        .optional()
+        .map_err(|e| e.to_string())?
+        .ok_or("标准砝码数据未找到")?;
 
     let weight_no = empty_to_null(data.weight_no.clone());
     let check_result = empty_to_null(data.check_result.clone());

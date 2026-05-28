@@ -46,8 +46,8 @@ export function useStandardWeight(projectId: Ref<number> | number) {
       } else {
         standardWeightForm.value = createEmptyStandardWeightForm()
       }
-    } catch {
-      // 可能没有砝码记录，使用默认值
+    } catch (e) {
+      console.error('加载砝码数据失败:', e)
       standardWeightForm.value = createEmptyStandardWeightForm()
     }
   }
@@ -72,7 +72,8 @@ export function useStandardWeight(projectId: Ref<number> | number) {
         standardWeightForm.value.id = result.id
       }
       ElMessage.success('砝码检查已保存')
-    } catch {
+    } catch (e) {
+      console.error('保存砝码检查失败:', e)
       ElMessage.error('保存失败')
     }
   }

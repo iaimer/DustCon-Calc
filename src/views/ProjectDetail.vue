@@ -28,18 +28,18 @@ import SampleTable from '../components/samples/SampleTable.vue'
 import type { ProjectFormData } from '../types/project'
 
 const props = defineProps<{ projectId: number }>()
-const emit = defineEmits([])
+const emit = defineEmits(['projectSaved'])
 
 const projectFormRef = ref<InstanceType<typeof ProjectInfoForm> | null>(null)
 const standardWeightRef = ref<InstanceType<typeof StandardWeightForm> | null>(null)
 const sampleTableRef = ref<InstanceType<typeof SampleTable> | null>(null)
 
-// 项目保存时触发样品重新计算
 const onProjectSave = (formData: ProjectFormData) => {
   sampleTableRef.value?.updateEnvParams({
     sampling_temperature: formData.sampling_temperature,
     sampling_air_pressure: formData.sampling_air_pressure
   })
+  emit('projectSaved')
 }
 
 // 环境参数变化时更新样品计算
@@ -58,7 +58,7 @@ const loadAllData = async () => {
 }
 
 // 监听projectId变化
-watch(() => props.projectId, loadAllData, { immediate: true })
+watch(() => props.projectId, loadAllData)
 
 onMounted(loadAllData)
 </script>

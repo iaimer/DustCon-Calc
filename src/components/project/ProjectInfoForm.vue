@@ -183,10 +183,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRef } from 'vue'
+import { toRef } from 'vue'
 import { useProject } from '../../composables/useProject'
 import { useNumericInput } from '../../composables/useNumericInput'
-import { needV0Conversion } from '../../utils/calculator'
 import type { ProjectFormData } from '../../types/project'
 
 const props = defineProps<{ projectId: number }>()
@@ -201,16 +200,13 @@ const {
   samplingDateEnd,
   handleSamplingDateChange,
   loadProject,
-  saveProject
+  saveProject,
+  needV0ConversionFlag
 } = useProject(projectIdRef)
 
 const { tempInputs, handleNumberInput, handleNumberBlur, initTempInputs } = useNumericInput()
 
 const formData = projectForm
-
-const needV0ConversionFlag = computed(() => {
-  return needV0Conversion(formData.value.sampling_temperature, formData.value.sampling_air_pressure)
-})
 
 const emitSave = () => {
   saveProject()

@@ -48,9 +48,7 @@ pub struct SampleWithProjectId {
     data: SampleData,
 }
 
-fn empty_to_null(s: String) -> Option<String> {
-    if s.is_empty() { None } else { Some(s) }
-}
+use crate::commands::empty_to_null;
 
 fn get_sample_by_id(conn: &rusqlite::Connection, id: i64) -> Result<Sample, String> {
     let mut stmt = conn
@@ -87,7 +85,7 @@ fn get_sample_by_id(conn: &rusqlite::Connection, id: i64) -> Result<Sample, Stri
 
 #[command]
 pub fn get_samples(db: tauri::State<'_, Database>, project_id: i64) -> Result<Vec<Sample>, String> {
-    let conn = db.get_connection();
+    let conn = db.get_connection()?;
 
     let mut stmt = conn
         .prepare(
@@ -128,7 +126,7 @@ pub fn get_samples(db: tauri::State<'_, Database>, project_id: i64) -> Result<Ve
 
 #[command]
 pub fn create_sample(db: tauri::State<'_, Database>, project_id: i64, data: SampleData) -> Result<Sample, String> {
-    let conn = db.get_connection();
+    let conn = db.get_connection()?;
 
     conn.execute(
         "INSERT INTO samples (
@@ -163,7 +161,7 @@ pub fn create_sample(db: tauri::State<'_, Database>, project_id: i64, data: Samp
 
 #[command]
 pub fn update_sample(db: tauri::State<'_, Database>, id: i64, data: SampleData) -> Result<Sample, String> {
-    let conn = db.get_connection();
+    let conn = db.get_connection()?;
 
     conn.execute(
         "UPDATE samples SET
@@ -198,7 +196,7 @@ pub fn update_sample(db: tauri::State<'_, Database>, id: i64, data: SampleData) 
 
 #[command]
 pub fn delete_sample(db: tauri::State<'_, Database>, id: i64) -> Result<bool, String> {
-    let conn = db.get_connection();
+    let conn = db.get_connection()?;
     conn.execute("DELETE FROM samples WHERE id = ?", [id])
         .map_err(|e| e.to_string())?;
     Ok(true)
@@ -206,11 +204,12 @@ pub fn delete_sample(db: tauri::State<'_, Database>, id: i64) -> Result<bool, St
 
 #[command]
 pub fn batch_create_samples(db: tauri::State<'_, Database>, samples: Vec<SampleWithProjectId>) -> Result<Vec<Sample>, String> {
-    let conn = db.get_connection();
+    let conn = db.get_connection()?;
+    let tx = conn.unchecked_transaction().map_err(|e| e.to_string())?;
     let mut created = Vec::new();
 
     for item in samples {
-        conn.execute(
+        tx.execute(
             "INSERT INTO samples (
                 project_id, sample_type, sample_no, filter_no, w1, w2_first, w2_second,
                 w2_avg, weighing_diff, weighing_qc, delta_m, delta_m_qc, vt, v0,
@@ -237,9 +236,10 @@ pub fn batch_create_samples(db: tauri::State<'_, Database>, samples: Vec<SampleW
         )
         .map_err(|e| e.to_string())?;
 
-        let id = conn.last_insert_rowid();
-        created.push(get_sample_by_id(&conn, id)?);
+        let id = tx.last_insert_rowid();
+        created.push(get_sample_by_id(&tx, id)?);
     }
 
+    tx.commit().map_err(|e| e.to_string())?;
     Ok(created)
 }
