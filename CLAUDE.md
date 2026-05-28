@@ -1,27 +1,37 @@
-# CLAUDE.md
+# CLAUDE.md — 项目知识库
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> 粉尘浓度计算器 — 基于 GBZ/T 192 标准的工作场所粉尘浓度分析记录桌面应用。Apple Silicon 原生应用。
 
-## Project Overview
-
-粉尘浓度计算器 - A Tauri desktop application for recording and calculating workplace dust concentration measurements. Based on GBZ/T 192 standards. Apple Silicon only.
-
-## Commands
+## 快速命令
 
 ```bash
-npm run dev          # Start frontend dev server
-npm run tauri:dev    # Start Tauri development mode
-npm run build        # Build frontend only
-npm run tauri:build  # Build production DMG (aarch64)
-npm run test         # Run unit tests
-npm run test:watch   # Run tests in watch mode
+npm run dev          # 启动前端开发服务器
+npm run tauri:dev    # 启动 Tauri 开发模式
+npm run build        # 仅构建前端（vue-tsc + vite build）
+npm run tauri:build  # 构建发布版 DMG（aarch64）
+npm run test         # 运行单元测试
+npm run test:watch   # 监听模式运行测试
 ```
 
-## Architecture
+## 关键约束
 
-### Tauri IPC Pattern
+### 平台
+- 构建目标：`aarch64-apple-darwin`（Apple Silicon only）
+- 无需支持 Intel / Windows / Linux
 
-The app uses Tauri Commands for database operations:
+### 语言与标准
+- 代码注释 / 用户界面：中文
+- 遵循 GBZ/T 192.1-2025、GBZ/T 192.2-2025、GB/T 8170 标准
+
+### 数据存储
+- 本地 SQLite（`~/Library/Application Support/dust-calculator/dust-calculator.db`）
+- 数据库迁移在启动时自动运行（ALTER TABLE 处理存量数据）
+
+### 依赖控制
+- 非必要不新增 npm/cargo 依赖
+- 已有 `directories` crate 已被移除（手动拼接路径）
+
+## 架构概览
 
 ```
 ┌─────────────────┐         ┌─────────────────┐
@@ -33,90 +43,86 @@ The app uses Tauri Commands for database operations:
 └─────────────────┘         └─────────────────┘
 ```
 
-- **Rust backend** (`src-tauri/src/`): Handles all SQLite operations via Tauri Commands
-- **Frontend** (`src/`): Vue 3 application with Element Plus UI, calls `tauriAPI.*`
+### 后端 (src-tauri/src/)
 
-### Directory Structure
+| 路径 | 职责 |
+|------|------|
+| `main.rs` | 应用入口 |
+| `lib.rs` | Tauri setup + handler 注册 |
+| `db/mod.rs` | SQLite 连接初始化 + 迁移；`get_connection()` 返回 `Result<MutexGuard, String>` |
+| `commands/mod.rs` | 公共工具函数 `empty_to_null` |
+| `commands/projects.rs` | 项目 CRUD（6 个命令） |
+| `commands/samples.rs` | 样品 CRUD（5 个命令，含 batch_create_samples 事务） |
+| `commands/standard_weights.rs` | 标准砝码 CRUD（3 个命令） |
 
-```
-src-tauri/
-├── Cargo.toml              # Rust dependencies
-├── tauri.conf.json         # Tauri configuration
-├── icons/                  # App icons (icns, png)
-└── src/
-    ├── main.rs             # App entry
-    ├── lib.rs              # Tauri setup + handler registration
-    ├── db/
-    │   └── mod.rs          # SQLite connection + migrations
-    └── commands/
-        ├── mod.rs
-        ├── projects.rs     # Project CRUD commands
-        ├── samples.rs      # Sample CRUD commands
-        └── standard_weights.rs
+### 前端 (src/)
 
-src/
-├── api/
-│   └── tauri.ts            # Tauri invoke wrapper
-├── views/
-│   └── ProjectDetail.vue   # Main view
-├── components/
-│   ├── project/
-│   └── samples/
-├── composables/
-│   ├── useProject.ts
-│   ├── useSamples.ts
-│   └── useStandardWeight.ts
-├── types/
-│   ├── project.ts
-│   ├── sample.ts
-│   └── standardWeight.ts
-└── utils/
-    └── calculator.ts       # Core calculation logic
-```
+| 路径 | 职责 |
+|------|------|
+| `views/ProjectDetail.vue` | 主视图：项目信息 + 砝码检查 + 样品表格 |
+| `components/project/` | 项目信息表单、砝码检查表单 |
+| `components/samples/SampleTable.vue` | 样品表格（完整视图 + 誊抄视图双模式） |
+| `composables/useProject.ts` | 项目数据加载/保存逻辑 |
+| `composables/useSamples.ts` | 样品数据加载/保存/计算逻辑 |
+| `composables/useStandardWeight.ts` | 砝码数据逻辑 |
+| `composables/useSampleTableNavigation.ts` | 表格键盘导航（Tab/方向键） |
+| `composables/usePasteHandler.ts` | Excel 批量粘贴处理 |
+| `composables/useNumericInput.ts` | 温度/气压数值输入过滤与格式化 |
+| `api/tauri.ts` | Tauri invoke 封装层 |
+| `types/` | TypeScript 类型定义（Project/Sample/StandardWeight） |
+| `utils/calculator.ts` | 核心计算模块（GB/T 8170 修约、V0 换算、QC 判定） |
 
-### Database
+### 数据库表
 
-SQLite via `rusqlite` (native, bundled). Database path: `~/Library/Application Support/dust-calculator/dust-calculator.db`
+- `projects`：检测项目元数据（用人单位、日期、环境参数）
+- `samples`：样品数据（称量值、计算值、质控判定）
+- `standard_weights`：标准砝码检查记录
 
-**Tables:**
-- `projects`: Test project metadata (employer, date, environment parameters)
-- `samples`: Individual sample measurements with calculated values
-- `standard_weights`: Standard weight verification records
+### Tauri Commands（共 14 个）
 
-### Tauri Commands (14 total)
-
-| Category | Commands |
-|----------|----------|
+| 分类 | 命令 |
+|------|------|
 | Projects | `get_projects`, `get_project`, `create_project`, `update_project`, `delete_project`, `copy_project` |
 | Samples | `get_samples`, `create_sample`, `update_sample`, `delete_sample`, `batch_create_samples` |
 | StandardWeights | `get_standard_weight`, `create_standard_weight`, `update_standard_weight` |
 
-### Core Calculation Module
+### 核心计算 (`calculator.ts`)
 
-`src/utils/calculator.ts` implements all dust concentration calculations per GB/T 8170:
+- **四舍六入五成双**（`roundBank`）：严格遵循 GB/T 8170
+- **V0 换算**：温度 < 5°C 或 > 35°C，或气压 < 98.8kPa 或 > 103.4kPa 时自动计算
+- **样品类型判定**：编号含 `-0-` 的为空白样品
+- **QC 判定**：称量质控 ≤ 0.2mg、空白 Δm ≤ 0.02mg、样品 Δm > 0.1mg
+- **检出限临界值**：当原始浓度 < 最低定量浓度但 roundBank 修约后 ≥ 最低定量浓度时，改为向下取整避免矛盾
 
-- **Banker's rounding** (`roundBank`): 四舍六入五成双 - required by Chinese national standard
-- **V0 conversion**: Standard volume adjustment when temperature < 5°C or > 35°C, or pressure outside 98.8-103.4 kPa
-- **Sample type detection**: Samples with "-0-" in the ID are blank samples
-- **QC checks**: Weighing QC (diff ≤ 0.2mg), blank delta_m QC (≤ 0.02mg), sample delta_m QC (> 0.1mg)
-- **Detection limit edge case**: When raw concentration < min quant but rounded ≥ min quant, floor instead of Banker's round to avoid contradiction
+### 采样体积与精度
 
-**Sampling volumes**: 500L, 300L, 420L, 450L, 480L, 525L
-- 500L: detection value rounded to 1 decimal, min quantitative concentration = 0.2 mg/m³
-- Others: detection value rounded to 2 decimals
+| 体积 | 检测值精度 | 最低定量浓度 |
+|------|-----------|-------------|
+| 500L | 1 位小数 | 0.2 mg/m³ |
+| 300L | 2 位小数 | 0.34 mg/m³ |
+| 420L | 2 位小数 | 0.24 mg/m³ |
+| 450L | 2 位小数 | 0.23 mg/m³ |
+| 480L | 2 位小数 | 0.21 mg/m³ |
+| 525L | 2 位小数 | 0.20 mg/m³ |
 
-### QC Display
+### QC 内联显示
 
-QC status is displayed **inline** (not as separate columns):
-- **Weighing QC fail** → W₂ input cells get red background (`w2-qc-fail`), average gets red text
-- **Delta_m QC fail** → Δm cell gets red text
-- **Not detected** → 检测值 column shows "未检出" in gray italic
+QC 状态不占独立列，改为嵌入单元格内联指示：
+- 称量质控不合格 → W₂ 输入框红色背景（`w2-qc-fail`）、平均值红色文字
+- 增重质控不合格 → Δm 红色文字
+- 未检出 → 检测值列显示「未检出」灰色斜体
 
-## Notes
+## 重要决策记录
 
-- Build target: `aarch64-apple-darwin` (Apple Silicon only)
-- App size: ~4MB DMG (vs ~150MB Electron)
-- Database migrations run automatically on startup (ALTER TABLE for legacy data)
-- Tests verify the banker's rounding algorithm matches GB/T 8170 standard exactly
-- `empty_to_null` utility lives in `commands/mod.rs` (shared by all 3 command modules)
-- `get_connection()` returns `Result<MutexGuard, String>` — never panics, callers use `?`
+| 决策 | 原因 | 影响范围 |
+|------|------|----------|
+| 从 Electron 迁移到 Tauri | 体积从 ~150MB 降至 ~4MB，原生性能，Apple Silicon 原生支持 | 整体架构 |
+| `get_connection()` 返回 `Result` 而非 unwrap | 防止 Mutex 中毒导致整个应用崩溃 | `db/mod.rs` + 所有 commands 调用者 |
+| `batch_create_samples` 使用 `unchecked_transaction` | 避免批量插入中途失败时部分写入 | `commands/samples.rs` |
+| QC 列改为内联指示 | 匹配 Word 模板布局，减少列数，阅读更直观 | `SampleTable.vue` 表格结构 |
+| `empty_to_null` 提取到 `commands/mod.rs` | 消除 3 个命令文件中 8 行重复代码 | `commands/` 模块 |
+| 检出限临界值修约改为向下取整 | 避免 roundBank 修约后值 ≥ 检出限但实际浓度 < 检出限导致矛盾 | `utils/calculator.ts` |
+| 表格高度动态计算（`innerHeight - 260`） | 适配不同屏幕尺寸，不再固定 400px | `SampleTable.vue` |
+| 面板可折叠（`el-collapse`） | 节省空间，用户可按需展开/收起项目信息和砝码检查 | `ProjectDetail.vue` |
+| 粘贴解析用 `nextTick` 替代 `setTimeout(0)` | 更可靠、更语义化 | `useSampleTableNavigation.ts` |
+| 粘贴 `weight` 字段用 `isNaN` 检查替代 `|| null` | `|| null` 会吞掉 `0` 值 | `usePasteHandler.ts` |
