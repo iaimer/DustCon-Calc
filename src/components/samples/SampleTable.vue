@@ -94,7 +94,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="w1" label="采样前W1(mg)" width="110">
+      <el-table-column prop="w1" label="采样前W₁(mg)" width="110">
         <template #default="{ row, $index }">
           <div
             :data-cell="$index + '-w1'"
@@ -115,7 +115,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="采样后W2(mg)" width="260">
+      <el-table-column label="采样后W₂(mg)" width="260">
         <el-table-column prop="w2_first" label="第一次" width="86">
           <template #default="{ row, $index }">
             <div
@@ -241,6 +241,8 @@
       stripe
       height="400"
       highlight-current-row
+      :row-class-name="getRowClassName"
+      class="excel-table"
     >
       <el-table-column prop="sample_type" label="类型" width="70">
         <template #default="{ row }">
@@ -258,30 +260,36 @@
         <template #default="{ row }">{{ row.filter_no || '-' }}</template>
       </el-table-column>
 
-      <el-table-column prop="w1" label="采样前W1(mg)" width="110">
+      <el-table-column prop="w1" label="采样前W₁(mg)" width="110">
         <template #default="{ row }">{{ row.w1?.toFixed(2) || '-' }}</template>
       </el-table-column>
 
-      <el-table-column label="采样后W2(mg)" width="260">
+      <el-table-column label="采样后W₂(mg)" width="260">
         <el-table-column prop="w2_first" label="第一次" width="86">
           <template #default="{ row }">
-            <span :class="{ 'qc-fail': row.weighing_qc === '不合格' }">
-              {{ row.w2_first?.toFixed(2) || '-' }}
-            </span>
+            <div class="trans-cell" :class="{ 'w2-qc-fail': row.weighing_qc === '不合格' }">
+              <span :class="{ 'qc-fail': row.weighing_qc === '不合格' }">
+                {{ row.w2_first?.toFixed(2) || '-' }}
+              </span>
+            </div>
           </template>
         </el-table-column>
         <el-table-column prop="w2_second" label="第二次" width="86">
           <template #default="{ row }">
-            <span :class="{ 'qc-fail': row.weighing_qc === '不合格' }">
-              {{ row.w2_second?.toFixed(2) || '-' }}
-            </span>
+            <div class="trans-cell" :class="{ 'w2-qc-fail': row.weighing_qc === '不合格' }">
+              <span :class="{ 'qc-fail': row.weighing_qc === '不合格' }">
+                {{ row.w2_second?.toFixed(2) || '-' }}
+              </span>
+            </div>
           </template>
         </el-table-column>
         <el-table-column prop="w2_avg" label="平均(mg)" width="86">
           <template #default="{ row }">
-            <span :class="{ 'qc-fail': row.weighing_qc === '不合格' }">
-              {{ row.w2_avg?.toFixed(2) || '-' }}
-            </span>
+            <div class="trans-cell" :class="{ 'w2-qc-fail': row.weighing_qc === '不合格' }">
+              <span :class="{ 'qc-fail': row.weighing_qc === '不合格' }">
+                {{ row.w2_avg?.toFixed(2) || '-' }}
+              </span>
+            </div>
           </template>
         </el-table-column>
       </el-table-column>
@@ -306,10 +314,9 @@
         <template #default="{ row }">{{ row.concentration?.toFixed(3) || '-' }}</template>
       </el-table-column>
 
-      <el-table-column prop="is_detected" label="检测值(mg/m³)" width="110">
+      <el-table-column label="检测值(mg/m³)" width="110">
         <template #default="{ row }">
-          <span v-if="row.is_detected === '未检出'" class="not-detected">未检出</span>
-          <span v-else class="rounded-value">{{ formatRoundedValue(row) }}</span>
+          <span class="rounded-value">{{ formatRoundedValue(row) }}</span>
         </template>
       </el-table-column>
     </el-table>
@@ -417,6 +424,9 @@ defineExpose({ loadSamples, updateEnvParams })
 .excel-table :deep(.el-table__body .el-table__cell) {
   padding: 0;
 }
+.excel-table :deep(th .cell) {
+  text-align: center;
+}
 .excel-cell {
   width: 100%;
   height: 100%;
@@ -432,11 +442,17 @@ defineExpose({ loadSamples, updateEnvParams })
   background-color: #ecf5ff;
   box-shadow: inset 0 0 0 2px #409eff;
 }
-.excel-cell.w2-qc-fail {
+.excel-cell.w2-qc-fail,
+.trans-cell.w2-qc-fail {
   background-color: #fef0f0;
 }
 .excel-cell.w2-qc-fail:hover {
   background-color: #fde2e2;
+}
+.trans-cell {
+  padding: 4px 8px;
+  box-sizing: border-box;
+  text-align: center;
 }
 .excel-cell :deep(.el-input) {
   border: none;
