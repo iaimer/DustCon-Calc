@@ -1,7 +1,13 @@
 <template>
   <div class="app-container">
     <el-container style="height: 100vh">
-      <el-aside :width="sidebarCollapsed ? '0px' : '300px'" class="sidebar" :class="{ collapsed: sidebarCollapsed }">
+      <el-aside
+        :width="sidebarCollapsed ? '0px' : '300px'"
+        class="sidebar"
+        :class="{ collapsed: sidebarCollapsed }"
+        @mouseenter="cancelCollapse"
+        @mouseleave="scheduleCollapse"
+      >
         <div class="sidebar-content" v-show="!sidebarCollapsed">
           <div class="sidebar-header">
             <div class="sidebar-title-group">
@@ -70,6 +76,7 @@
         </div>
       </el-aside>
       <el-main class="main-content">
+        <div v-if="sidebarCollapsed" class="sidebar-hover-zone" @mouseenter="expandSidebar" />
         <ProjectDetail
           v-if="selectedProjectId"
           :project-id="selectedProjectId"
@@ -97,12 +104,6 @@
         </div>
       </el-main>
     </el-container>
-    <div v-if="sidebarCollapsed" class="sidebar-expand" @click="sidebarCollapsed = false">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="9 18 15 12 9 6"/>
-      </svg>
-      <span>展开侧栏</span>
-    </div>
   </div>
 </template>
 
@@ -119,6 +120,27 @@ const projects = ref<Project[]>([])
 const selectedProjectId = ref<number | null>(null)
 const searchKeyword = ref('')
 const sidebarCollapsed = ref(false)
+let autoHideTimer: ReturnType<typeof setTimeout> | null = null
+
+const expandSidebar = () => {
+  if (autoHideTimer) clearTimeout(autoHideTimer)
+  autoHideTimer = null
+  sidebarCollapsed.value = false
+}
+
+const scheduleCollapse = () => {
+  if (autoHideTimer) clearTimeout(autoHideTimer)
+  autoHideTimer = setTimeout(() => {
+    sidebarCollapsed.value = true
+  }, 400)
+}
+
+const cancelCollapse = () => {
+  if (autoHideTimer) {
+    clearTimeout(autoHideTimer)
+    autoHideTimer = null
+  }
+}
 
 const filteredProjects = computed(() => {
   if (!searchKeyword.value) return projects.value
@@ -266,25 +288,24 @@ body {
   align-items: center;
   gap: 8px;
 }
-.sidebar-expand {
+.sidebar-hover-zone {
   position: fixed;
   left: 0;
-  bottom: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
-  background: #fff;
-  color: #909399;
-  font-size: 12px;
-  cursor: pointer;
-  transition: color 0.15s;
-  border-top: 1px solid #ebeef5;
-  min-width: 300px;
+  top: 0;
+  z-index: 9999;
+  width: 18px;
+  height: 100vh;
+  cursor: default;
 }
-.sidebar-expand:hover {
-  color: #409eff;
+.sidebar-hover-zone::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(64,158,255,0);
+  transition: background 0.2s ease;
+}
+.sidebar-hover-zone:hover::after {
+  background: rgba(64,158,255,0.06);
 }
 
 .sidebar-header {

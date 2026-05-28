@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "粉尘浓度计算器",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "identifier": "com.dust-calculator.app",
   "build": {
     "frontendDist": "../dist",
