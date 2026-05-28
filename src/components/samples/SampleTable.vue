@@ -94,7 +94,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="w1" label="采样前质量W1(mg)" width="120">
+      <el-table-column prop="w1" label="采样前W1(mg)" width="110">
         <template #default="{ row, $index }">
           <div
             :data-cell="$index + '-w1'"
@@ -115,69 +115,60 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="w2_first" label="采样后第一次(mg)" width="120">
-        <template #default="{ row, $index }">
-          <div
-            :data-cell="$index + '-w2_first'"
-            class="excel-cell"
-            :class="{ 'cell-selected': currentCell?.row === $index && currentCell?.col === 3 }"
-            @click="handleCellClick($index, 'w2_first')"
-          >
-            <el-input
-              v-model="row.w2_first"
-              size="small"
-              @change="handleWChange(row, 'w2_first')"
-              @keydown="onKeydown($event, $index, 'w2_first')"
-              @focus="handleCellFocus($index, 'w2_first')"
-              @blur="handleWBlur(row, 'w2_first')"
-              style="width: 100%"
-            />
-          </div>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="w2_second" label="采样后第二次(mg)" width="120">
-        <template #default="{ row, $index }">
-          <div
-            :data-cell="$index + '-w2_second'"
-            class="excel-cell"
-            :class="{ 'cell-selected': currentCell?.row === $index && currentCell?.col === 4 }"
-            @click="handleCellClick($index, 'w2_second')"
-          >
-            <el-input
-              v-model="row.w2_second"
-              size="small"
-              @change="handleWChange(row, 'w2_second')"
-              @keydown="onKeydown($event, $index, 'w2_second')"
-              @focus="handleCellFocus($index, 'w2_second')"
-              @blur="handleWBlur(row, 'w2_second')"
-              style="width: 100%"
-            />
-          </div>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="w2_avg" label="采样后平均W2(mg)" width="120">
-        <template #default="{ row }">
-          <span>{{ row.w2_avg?.toFixed(2) || '-' }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="weighing_diff" label="称量差值(mg)" width="100">
-        <template #default="{ row }">
-          <span :class="{ 'qc-fail': row.weighing_qc === '不合格' }">
-            {{ row.weighing_diff?.toFixed(2) || '-' }}
-          </span>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="weighing_qc" label="称量质控" width="80">
-        <template #default="{ row }">
-          <el-tag v-if="row.weighing_qc" :type="row.weighing_qc === '合格' ? 'success' : 'danger'" size="small">
-            {{ row.weighing_qc }}
-          </el-tag>
-          <span v-else>-</span>
-        </template>
+      <el-table-column label="采样后W2(mg)" width="260">
+        <el-table-column prop="w2_first" label="第一次" width="86">
+          <template #default="{ row, $index }">
+            <div
+              :data-cell="$index + '-w2_first'"
+              class="excel-cell"
+            :class="{
+              'cell-selected': currentCell?.row === $index && currentCell?.col === 3,
+              'w2-qc-fail': row.weighing_qc === '不合格'
+            }"
+              @click="handleCellClick($index, 'w2_first')"
+            >
+              <el-input
+                v-model="row.w2_first"
+                size="small"
+                @change="handleWChange(row, 'w2_first')"
+                @keydown="onKeydown($event, $index, 'w2_first')"
+                @focus="handleCellFocus($index, 'w2_first')"
+                @blur="handleWBlur(row, 'w2_first')"
+                style="width: 100%"
+              />
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="w2_second" label="第二次" width="86">
+          <template #default="{ row, $index }">
+            <div
+              :data-cell="$index + '-w2_second'"
+              class="excel-cell"
+            :class="{
+              'cell-selected': currentCell?.row === $index && currentCell?.col === 4,
+              'w2-qc-fail': row.weighing_qc === '不合格'
+            }"
+              @click="handleCellClick($index, 'w2_second')"
+            >
+              <el-input
+                v-model="row.w2_second"
+                size="small"
+                @change="handleWChange(row, 'w2_second')"
+                @keydown="onKeydown($event, $index, 'w2_second')"
+                @focus="handleCellFocus($index, 'w2_second')"
+                @blur="handleWBlur(row, 'w2_second')"
+                style="width: 100%"
+              />
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="w2_avg" label="平均(mg)" width="86">
+          <template #default="{ row }">
+            <span :class="{ 'qc-fail': row.weighing_qc === '不合格' }">
+              {{ row.w2_avg?.toFixed(2) || '-' }}
+            </span>
+          </template>
+        </el-table-column>
       </el-table-column>
 
       <el-table-column prop="delta_m" label="增重Δm(mg)" width="100">
@@ -185,15 +176,6 @@
           <span :class="{ 'qc-fail': row.delta_m_qc === '不合格' }">
             {{ row.delta_m?.toFixed(2) || '-' }}
           </span>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="delta_m_qc" label="增重质控" width="80">
-        <template #default="{ row }">
-          <el-tag v-if="row.delta_m_qc" :type="row.delta_m_qc === '合格' ? 'success' : 'danger'" size="small">
-            {{ row.delta_m_qc }}
-          </el-tag>
-          <span v-else>-</span>
         </template>
       </el-table-column>
 
@@ -233,17 +215,14 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="rounded_value" label="检测值(修约)" width="100">
+      <el-table-column prop="rounded_value" label="检测值(mg/m³)" width="110">
         <template #default="{ row }">
-          <span class="rounded-value">{{ formatRoundedValue(row) }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="is_detected" label="是否检出" width="80">
-        <template #default="{ row }">
-          <el-tag v-if="row.is_detected === '检出'" type="success" size="small">检出</el-tag>
-          <el-tag v-else-if="row.is_detected === '未检出'" type="info" size="small">未检出</el-tag>
-          <span v-else>{{ row.is_detected || '-' }}</span>
+          <span v-if="row.is_detected === '未检出'" class="not-detected">
+            未检出
+          </span>
+          <span v-else class="rounded-value">
+            {{ formatRoundedValue(row) }}
+          </span>
         </template>
       </el-table-column>
 
@@ -279,24 +258,40 @@
         <template #default="{ row }">{{ row.filter_no || '-' }}</template>
       </el-table-column>
 
-      <el-table-column prop="w1" label="采样前质量W1(mg)" width="120">
+      <el-table-column prop="w1" label="采样前W1(mg)" width="110">
         <template #default="{ row }">{{ row.w1?.toFixed(2) || '-' }}</template>
       </el-table-column>
 
-      <el-table-column prop="w2_first" label="采样后第一次(mg)" width="120">
-        <template #default="{ row }">{{ row.w2_first?.toFixed(2) || '-' }}</template>
-      </el-table-column>
-
-      <el-table-column prop="w2_second" label="采样后第二次(mg)" width="120">
-        <template #default="{ row }">{{ row.w2_second?.toFixed(2) || '-' }}</template>
-      </el-table-column>
-
-      <el-table-column prop="w2_avg" label="采样后平均W2(mg)" width="120">
-        <template #default="{ row }">{{ row.w2_avg?.toFixed(2) || '-' }}</template>
+      <el-table-column label="采样后W2(mg)" width="260">
+        <el-table-column prop="w2_first" label="第一次" width="86">
+          <template #default="{ row }">
+            <span :class="{ 'qc-fail': row.weighing_qc === '不合格' }">
+              {{ row.w2_first?.toFixed(2) || '-' }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="w2_second" label="第二次" width="86">
+          <template #default="{ row }">
+            <span :class="{ 'qc-fail': row.weighing_qc === '不合格' }">
+              {{ row.w2_second?.toFixed(2) || '-' }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="w2_avg" label="平均(mg)" width="86">
+          <template #default="{ row }">
+            <span :class="{ 'qc-fail': row.weighing_qc === '不合格' }">
+              {{ row.w2_avg?.toFixed(2) || '-' }}
+            </span>
+          </template>
+        </el-table-column>
       </el-table-column>
 
       <el-table-column prop="delta_m" label="增重Δm(mg)" width="100">
-        <template #default="{ row }">{{ row.delta_m?.toFixed(2) || '-' }}</template>
+        <template #default="{ row }">
+          <span :class="{ 'qc-fail': row.delta_m_qc === '不合格' }">
+            {{ row.delta_m?.toFixed(2) || '-' }}
+          </span>
+        </template>
       </el-table-column>
 
       <el-table-column prop="vt" label="Vt(L)" width="80">
@@ -311,9 +306,10 @@
         <template #default="{ row }">{{ row.concentration?.toFixed(3) || '-' }}</template>
       </el-table-column>
 
-      <el-table-column prop="rounded_value" label="检测值(修约)" width="100">
+      <el-table-column prop="is_detected" label="检测值(mg/m³)" width="110">
         <template #default="{ row }">
-          <span class="rounded-value">{{ formatRoundedValue(row) }}</span>
+          <span v-if="row.is_detected === '未检出'" class="not-detected">未检出</span>
+          <span v-else class="rounded-value">{{ formatRoundedValue(row) }}</span>
         </template>
       </el-table-column>
     </el-table>
@@ -366,14 +362,12 @@ const { handlePaste } = usePasteHandler(
   updateSample
 )
 
-// 更新采样环境参数
 const updateEnvParams = (env: { sampling_temperature: number | null; sampling_air_pressure: number | null }) => {
   samplingTemp.value = env.sampling_temperature
   samplingPressure.value = env.sampling_air_pressure
   recalculateAllV0()
 }
 
-// 包装键盘事件处理
 const onKeydown = (e: Event, row: number, field: 'sample_no' | 'filter_no' | 'w1' | 'w2_first' | 'w2_second' | 'vt') => {
   handleCellKeydown(e as KeyboardEvent, row, field)
 }
@@ -405,6 +399,10 @@ defineExpose({ loadSamples, updateEnvParams })
   font-weight: bold;
   color: #409eff;
 }
+.not-detected {
+  color: #909399;
+  font-style: italic;
+}
 :deep(.qc-fail-row) {
   background-color: #fef0f0 !important;
 }
@@ -416,7 +414,6 @@ defineExpose({ loadSamples, updateEnvParams })
 :deep(.el-table) {
   font-size: 13px;
 }
-/* Excel风格单元格 */
 .excel-table :deep(.el-table__body .el-table__cell) {
   padding: 0;
 }
@@ -434,6 +431,12 @@ defineExpose({ loadSamples, updateEnvParams })
 .excel-cell.cell-selected {
   background-color: #ecf5ff;
   box-shadow: inset 0 0 0 2px #409eff;
+}
+.excel-cell.w2-qc-fail {
+  background-color: #fef0f0;
+}
+.excel-cell.w2-qc-fail:hover {
+  background-color: #fde2e2;
 }
 .excel-cell :deep(.el-input) {
   border: none;
