@@ -1,12 +1,5 @@
 <template>
-  <el-card class="project-header-card">
-    <template #header>
-      <div class="card-header">
-        <span>项目信息</span>
-      </div>
-    </template>
-
-    <el-form ref="formRef" :model="formData" label-width="100px" @submit.prevent>
+  <el-form ref="formRef" :model="formData" label-width="100px" @submit.prevent>
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="用人单位">
@@ -179,7 +172,6 @@
         </el-col>
       </el-row>
     </el-form>
-  </el-card>
 </template>
 
 <script setup lang="ts">
@@ -242,12 +234,4 @@ defineExpose({ init, formData })
 </script>
 
 <style scoped>
-.project-header-card {
-  margin-bottom: 20px;
-}
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 </style>

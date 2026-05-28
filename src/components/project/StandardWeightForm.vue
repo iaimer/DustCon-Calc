@@ -1,10 +1,5 @@
 <template>
-  <el-card class="standard-weight-card">
-    <template #header>
-      <span>标准砝码检查</span>
-    </template>
-
-    <el-form :model="formData" label-width="100px">
+  <el-form :model="formData" label-width="100px">
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item label="砝码编号">
@@ -45,7 +40,6 @@
         </el-col>
       </el-row>
     </el-form>
-  </el-card>
 </template>
 
 <script setup lang="ts">
@@ -68,9 +62,3 @@ const formData = standardWeightForm
 
 defineExpose({ loadStandardWeight })
 </script>
-
-<style scoped>
-.standard-weight-card {
-  margin-bottom: 20px;
-}
-</style>

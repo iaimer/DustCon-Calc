@@ -70,6 +70,7 @@ export function useSamples(projectId: Ref<number> | number) {
         }
       }) as SampleRowData[]
     } catch (e) {
+      console.error('加载样品数据失败:', e)
       ElMessage.error('加载样品数据失败')
     }
   }

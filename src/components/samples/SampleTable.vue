@@ -44,7 +44,7 @@
       @paste.capture.prevent="handlePaste"
       class="excel-table"
     >
-      <el-table-column prop="sample_type" label="类型" width="70">
+      <el-table-column prop="sample_type" label="类型" width="70" fixed>
         <template #default="{ row }">
           <el-tag :type="row.sample_type === '空白' ? 'warning' : 'primary'" size="small">
             {{ row.sample_type || '-' }}
@@ -52,7 +52,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="sample_no" label="样品编号" width="200">
+      <el-table-column prop="sample_no" label="样品编号" width="200" fixed>
         <template #default="{ row, $index }">
           <div
             :data-cell="$index + '-sample_no'"
@@ -226,7 +226,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" width="60" fixed="right">
+      <el-table-column label="操作" width="60">
         <template #default="{ row, $index }">
           <el-button type="danger" size="small" :icon="Delete" circle @click="deleteSampleRow(row, $index)" />
         </template>
@@ -244,7 +244,7 @@
       :row-class-name="getRowClassName"
       class="excel-table"
     >
-      <el-table-column prop="sample_type" label="类型" width="70">
+      <el-table-column prop="sample_type" label="类型" width="70" fixed>
         <template #default="{ row }">
           <el-tag :type="row.sample_type === '空白' ? 'warning' : 'primary'" size="small">
             {{ row.sample_type || '-' }}
@@ -252,7 +252,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="sample_no" label="样品编号" width="200">
+      <el-table-column prop="sample_no" label="样品编号" width="200" fixed>
         <template #default="{ row }">{{ row.sample_no || '-' }}</template>
       </el-table-column>
 

@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-28T21:00:00.000Z",
+  "title": "Design System: 粉尘浓度计算器",
+  "extensions": {
+    "colorMeta": {
+      "primary":        { "role": "primary",  "displayName": "检测蓝", "canonical": "#409eff", "tonalRamp": ["#1a3a6b", "#20509e", "#2b6bc9", "#3686ec", "#409eff", "#5aaeff", "#85c4ff", "#b0d9ff", "#dbeaff"] },
+      "danger":         { "role": "danger",   "displayName": "QC不合格红", "canonical": "#f56c6c", "tonalRamp": ["#7a2020", "#a33a3a", "#c94e4e", "#e86161", "#f56c6c", "#f78989", "#f9a6a6", "#fbc4c4", "#fde2e2"] },
+      "bg-qc-fail":     { "role": "surface",  "displayName": "QC失败背景", "canonical": "#fef0f0" },
+      "bg-active":      { "role": "surface",  "displayName": "选中背景", "canonical": "#ecf5ff" },
+      "text-primary":   { "role": "neutral",  "displayName": "主体文字", "canonical": "#303133" },
+      "text-secondary": { "role": "neutral",  "displayName": "辅助文字", "canonical": "#909399" }
+    },
+    "typographyMeta": {
+      "body":         { "displayName": "正文", "purpose": "表格数据、表单标签、段落" },
+      "label":        { "displayName": "标签", "purpose": "辅助说明、按钮文字、表头" },
+      "sidebar-title": { "displayName": "侧栏标题", "purpose": "应用标题，仅此一处" }
+    }
+  },
+  "components": [
+    {
+      "name": "主要按钮",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "主要操作按钮，用于新建项目、保存等",
+      "html": "<button class=\"ds-btn-primary\">新建项目</button>",
+      "css": ".ds-btn-primary { background: #409eff; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; font-family: 'PingFang SC',-apple-system,BlinkMacSystemFont,sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s; } .ds-btn-primary:hover { background: #66b1ff; } .ds-btn-primary:active { background: #3a8ee6; }"
+    },
+    {
+      "name": "Excel 表格输入框",
+      "kind": "input",
+      "refersTo": "input-excel-cell",
+      "description": "样品表格中的嵌入输入框，无边框、透明背景",
+      "html": "<div class=\"ds-excel-cell\"><input class=\"ds-excel-input\" type=\"text\" value=\"0.1234\" /></div>",
+      "css": ".ds-excel-cell { width: 100%; padding: 4px 8px; box-sizing: border-box; background: #fff; cursor: cell; transition: background-color 0.15s; } .ds-excel-cell:hover { background: #f5f7fa; } .ds-excel-cell.ds-selected { background: #ecf5ff; box-shadow: inset 0 0 0 2px #409eff; } .ds-excel-input { border: none; background: transparent; box-shadow: none; padding: 0; width: 100%; height: 24px; line-height: 24px; font-family: 'PingFang SC',-apple-system,BlinkMacSystemFont,sans-serif; font-size: 13px; color: #303133; outline: none; }"
+    },
+    {
+      "name": "QC 不合格单元格",
+      "kind": "custom",
+      "refersTo": "cell-qc-fail",
+      "description": "称量质控不合格时的 W₂ 输入区域，红色背景",
+      "html": "<div class=\"ds-excel-cell ds-qc-fail\"><span class=\"ds-qc-text\">0.1234</span></div>",
+      "css": ".ds-excel-cell { width: 100%; padding: 4px 8px; box-sizing: border-box; } .ds-excel-cell.ds-qc-fail { background: #fef0f0; } .ds-excel-cell.ds-qc-fail:hover { background: #fde2e2; } .ds-qc-text { color: #f56c6c; font-weight: 700; font-family: 'PingFang SC',-apple-system,BlinkMacSystemFont,sans-serif; font-size: 13px; }"
+    },
+    {
+      "name": "检测值（蓝色粗体）",
+      "kind": "custom",
+      "refersTo": "cell-rounded-value",
+      "description": "样品表格中计算后的检测值，蓝色粗体突出",
+      "html": "<span class=\"ds-rounded-value\">0.24</span>",
+      "css": ".ds-rounded-value { font-weight: 700; color: #409eff; font-family: 'PingFang SC',-apple-system,BlinkMacSystemFont,sans-serif; font-size: 13px; }"
+    },
+    {
+      "name": "侧栏切换按钮",
+      "kind": "custom",
+      "refersTo": "sidebar-toggle",
+      "description": "侧栏折叠/展开的窄条按钮",
+      "html": "<div class=\"ds-toggle\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"15 18 9 12 15 6\"/></svg></div>",
+      "css": ".ds-toggle { width: 16px; height: 48px; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #909399; border-radius: 0 4px 4px 0; box-shadow: 1px 0 4px rgba(0,0,0,0.08); transition: all 0.25s ease; position: absolute; left: 300px; top: 50%; transform: translateY(-50%); } .ds-toggle:hover { background: #409eff; color: #fff; box-shadow: 0 2px 8px rgba(64,158,255,0.4); }"
+    },
+    {
+      "name": "可折叠面板",
+      "kind": "custom",
+      "refersTo": "collapsible-panel",
+      "description": "项目信息和砝码检查的折叠面板，无边框无阴影",
+      "html": "<div class=\"ds-panel\"><div class=\"ds-panel-header\">项目信息</div><div class=\"ds-panel-body\"><div class=\"ds-panel-content\">表单内容...</div></div></div>",
+      "css": ".ds-panel { border: none; box-shadow: none; margin-bottom: 12px; } .ds-panel-header { padding: 12px 0; font-family: 'PingFang SC',-apple-system,BlinkMacSystemFont,sans-serif; font-size: 14px; font-weight: 600; color: #303133; border-bottom: 1px solid #e4e7ed; } .ds-panel-body { padding: 10px 0; } .ds-panel-content { font-family: 'PingFang SC',-apple-system,BlinkMacSystemFont,sans-serif; font-size: 13px; color: #303133; }"
+    },
+    {
+      "name": "侧栏项目项",
+      "kind": "nav",
+      "refersTo": "sidebar-item",
+      "description": "项目列表中的单个项目",
+      "html": "<div class=\"ds-sidebar-item ds-active\"><div class=\"ds-sidebar-item-header\"><span class=\"ds-sidebar-item-name\">检测编号 2025-001</span></div><div class=\"ds-sidebar-item-date\">2025.05.28</div></div>",
+      "css": ".ds-sidebar-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #ebeef5; transition: background 0.2s; font-family: 'PingFang SC',-apple-system,BlinkMacSystemFont,sans-serif; } .ds-sidebar-item:hover { background: #f5f7fa; } .ds-sidebar-item.ds-active { background: #ecf5ff; } .ds-sidebar-item-name { font-weight: 500; font-size: 14px; color: #303133; } .ds-sidebar-item-date { margin-top: 4px; font-size: 12px; color: #909399; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "分析工作台",
+    "overview": "这个设计系统服务于职业卫生实验室的检测人员。使用者坐在工作站前，面对一批待处理的采样滤膜，在应用里填写称量数据、审查计算结果、打印检测报告。设计氛围由此决定：平实、不喧哗、每一个元素都有功能理由。视觉语言从实验室仪器和手工记录表中汲取气质——不模仿SaaS仪表盘，也不模仿学术论文的拥挤排版。白色背景上灰色和蓝色构建层级，红色只在QC不合格时出现——它的稀有性就是意义。",
+    "keyCharacteristics": [
+      "功能即装饰。不添加纯装饰性元素。阴影、颜色、圆角都有明确的交互意图",
+      "信息密度可调节：完整视图（编辑态）和誊抄视图（打印态）满足两种需求",
+      "状态嵌入内容：QC不合格直接标红数据本身，不扩散到独立列或弹窗",
+      "蓝灰基调，红色仅为QC失败保留，银色为未检出保留"
+    ],
+    "rules": [
+      { "name": "红色协定", "body": "红色（#f56c6c）只用于QC不合格。不出现在按钮、标签、链接或任何装饰性元素中。它的缺席意味着一切正常。", "section": "colors" },
+      { "name": "扁平默认法则", "body": "静止状态下无阴影。层级靠背景色过渡。阴影只在交互反馈中出现，不是结构的一部分。", "section": "elevation" }
+    ],
+    "dos": [
+      "让表格占据主要内容区80%以上的面积。其他面板应可折叠，不抢占表格的注意力。",
+      "使用蓝色（#409eff）作为唯一的交互态颜色。选中、聚焦、链接、按钮保持一致。",
+      "用红色（#f56c6c）标示QC不合格的数值。红色只出现于此。",
+      "在单元格内用蓝色粗体（rounded-value）突出显示计算结果（检测值）。",
+      "保持侧栏项目列表简洁，操作按钮hover才显示。",
+      "使用13px表格字号平衡可读性和信息密度。"
+    ],
+    "donts": [
+      "添加独立QC判定列。不合格状态应通过内联红色文字标示。",
+      "使用弹窗或对话框来告知QC结果。状态就在数据所在的位置。",
+      "出现除#409eff（检测蓝）和#f56c6c（QC红）以外的有彩色。不要使用绿色表示合格。",
+      "在侧栏或表格以外添加卡片式区域。元素靠间距和对齐组织，不需要卡片包裹。",
+      "用科研论文的拥挤排版。保持单元格间距舒适，行间有足够呼吸感。",
+      "在应显示检测值的单元格中显示「——」、「-」或空白。显示计算结果或明确标示未检出。"
+    ]
+  }
+}
