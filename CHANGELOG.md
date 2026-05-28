@@ -32,9 +32,23 @@
 - 修复列标题居中和 W₁/W₂ 下标显示
 - 多处 catch 块添加错误日志，避免静默吞异常
 
+### UI 优化
+- 侧栏活跃项添加 3px 左侧检测蓝色条
+- 标题添加英文副标题 "Dust Concentration Analyzer"
+- 空状态替换为引导文字 + 快速新建项目按钮
+- 折叠按钮从页头移至侧栏底部底栏方案，更协调
+- 表格冻结类型 + 样品编号列，操作列不冻结
+- 去除项目信息/砝码检查面板的双重标题
+- 按钮图标改用内联 SVG，解决 Tauri 渲染不一致
+
 ### 代码质量
 - `empty_to_null` 抽取为公共函数，消除重复
 - `get_connection()` 返回 `Result` 类型而非直接 unwrap
 - `setTimeout(0)` 替换为 `nextTick`
 - TypeScript 类型 `any[]` 替换为 `Project[]`
 - 去除未使用依赖 `directories`
+
+### 文档
+- 建立 PRODUCT.md 产品策略文档
+- 建立 DESIGN.md 设计系统文档（色板、排版、阴影、组件规范）
+- 按 AGENTS 模板重写 CLAUDE.md（关键约束/架构/决策记录）

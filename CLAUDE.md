@@ -126,3 +126,8 @@ QC 状态不占独立列，改为嵌入单元格内联指示：
 | 面板可折叠（`el-collapse`） | 节省空间，用户可按需展开/收起项目信息和砝码检查 | `ProjectDetail.vue` |
 | 粘贴解析用 `nextTick` 替代 `setTimeout(0)` | 更可靠、更语义化 | `useSampleTableNavigation.ts` |
 | 粘贴 `weight` 字段用 `isNaN` 检查替代 `|| null` | `|| null` 会吞掉 `0` 值 | `usePasteHandler.ts` |
+| 侧栏折叠改为底栏「◄ 折叠侧栏」 | 迷你图标按钮和「新建项目」主按钮不协调，底栏方案视觉统一 | `App.vue` |
+| 移除 `<Transition mode="out-in">` | 切换项目时重建组件干扰 `onMounted` 子组件 ref 的数据加载时序 | `ProjectDetail.vue` |
+| 类型 + 样品编号列冻结 | 水平滚动时关键列保持可见，提升录入效率 | `SampleTable.vue` |
+| 去除 ProjectInfoForm/StandardWeightForm 内层 `<el-card>` | 面板已放置在 `el-collapse` 内，内层卡片导致标题重复 | `ProjectInfoForm.vue`, `StandardWeightForm.vue` |
+| 内联 SVG 替代 Element Plus 图标组件 | 图标在 Tauri 中渲染不一致，内联 SVG 更可靠 | `App.vue` |

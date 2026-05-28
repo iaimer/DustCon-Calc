@@ -54,3 +54,47 @@
 - 前端构建通过
 - cargo 编译无警告
 - 已合并到 `main` 分支
+
+---
+
+## 2026-05-28 UI 精细化与设计系统建立
+
+### 讨论内容
+- 使用 Impeccable 设计工作流建立 PRODUCT.md（产品策略）和 DESIGN.md（设计系统）
+- 侧栏优化：活跃项 3px 左侧色条、英文副标题、空状态引导
+- 折叠按钮从页头移到侧栏底部底栏方案
+- 解决深层 bug：`<Transition>` 导致切换项目不加载数据
+- 图标改用内联 SVG 解决 Tauri 渲染不一致
+- 表格冻结类型 + 样品编号列，操作列不冻结
+- 去除面板双重标题
+- 修正复制/删除按钮 hover 可见性（visibility vs opacity）
+
+### 决策 & 原因
+- **底栏折叠方案**：移除页头折叠按钮 + 弹出式展开按钮，改为侧栏底部「◄ 折叠侧栏」/左下角「► 展开侧栏」，视觉更统一
+- **移除 Transition**：`<Transition mode="out-in">` 导致组件卸载重建，子组件 ref 时序错乱，数据无法加载
+- **内联 SVG 替代图标组件**：`<el-icon>` 和 `:icon` prop 在 Tauri 中不渲染，且无需注册 ExtraIcon 组件
+- **按钮可见性用 visibility+opacity**：纯 opacity:0 时点击事件仍触发，visibility hidden 可阻止点击
+
+### 改动文件清单
+| 文件 | 改动 |
+|------|------|
+| `PRODUCT.md` | 新建（产品策略文档） |
+| `DESIGN.md` | 新建（设计系统文档） |
+| `.impeccable/design.json` | 新建（设计令牌） |
+| `src/App.vue` | 底栏折叠、侧栏色条、空状态、标题副标题、内联 SVG、Transition 移除、按钮可见性 |
+| `src/components/samples/SampleTable.vue` | 冻结类型+样品编号列 |
+| `src/components/project/ProjectInfoForm.vue` | 移除内层 el-card |
+| `src/components/project/StandardWeightForm.vue` | 移除内层 el-card |
+| `src/composables/useSamples.ts` | catch 加 console.error |
+| `src/components.d.ts` | 自动更新 |
+| `src/views/ProjectDetail.vue` | Transition 移除 |
+
+### 遇到的问题
+- `<Transition mode="out-in">` 包裹项目详情导致切换时重建组件，`onMounted` 中子组件 ref 为空，数据不加载
+- `opacity: 0` 不阻止点击事件，hover 区域内的复制/删除按钮即使在隐藏状态也能被点击
+- Element Plus 图标组件在 Tauri 中 `:icon` prop 不渲染，改用内联 SVG 解决
+
+### 最终结果
+- 前端构建通过
+- 所有历史数据可正常加载
+- 「分析工作台」设计系统建立到位
